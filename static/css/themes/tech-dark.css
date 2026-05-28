@@ -1,0 +1,336 @@
+/* static/css/themes/tech-dark.css */
+
+:root {
+    --primary-color: #00ff88;
+    --secondary-color: #00d2ff;
+    --bg-color: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --text-color: #f1f5f9;
+    --border-color: rgba(148, 163, 184, 0.2);
+    
+    /* Bootstrap Variable Overrides */
+    --bs-primary: var(--primary-color);
+    --bs-secondary: var(--secondary-color);
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+}
+
+/* Custom Theme Utility Classes */
+.theme-overlay-bg {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.theme-text-contrast {
+    color: #fff !important;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Background Canvas */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Tech Grid Overlay */
+.grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Navbar Visuals */
+.navbar-custom {
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    color: #fff !important;
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 5px var(--primary-color));
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.nav-link::after {
+    background: var(--primary-color);
+}
+
+/* Upload Card Visuals */
+.upload-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.05);
+}
+
+.upload-card::before {
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+}
+
+/* Image Preview Visuals */
+.image-preview-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.image-preview-container.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1) inset;
+}
+
+/* Corner Marker Visuals */
+.corner-marker {
+    border-color: var(--primary-color);
+}
+
+/* Result Card Visuals */
+.result-card {
+    background: rgba(0, 210, 255, 0.05);
+    border: 1px solid var(--secondary-color);
+}
+
+.result-card::after {
+    background: var(--bg-color);
+    color: var(--secondary-color);
+}
+
+/* History Container Visuals */
+.history-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.history-header {
+    border-bottom-color: var(--border-color);
+}
+
+/* Form Controls Visuals */
+.form-range {
+    accent-color: var(--primary-color);
+}
+
+.form-select,
+.form-control {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.form-select:focus,
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 255, 136, 0.1);
+}
+
+.form-check-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-control::placeholder {
+    color: rgba(148, 163, 184, 0.5);
+}
+
+/* Button Visuals */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+}
+
+.coord-panel .form-control {
+    background-color: rgba(15, 23, 42, 0.95) !important;
+    border-color: rgba(148, 163, 184, 0.9) !important;
+    color: #f9fafb !important;
+}
+
+.coord-panel .form-control:focus {
+    background-color: rgba(15, 23, 42, 1) !important;
+    color: #f9fafb !important;
+}
+
+.coord-panel .input-group-text {
+    background-color: transparent !important;
+    border-color: rgba(148, 163, 184, 0.9) !important;
+    color: #f9fafb !important;
+}
+
+.btn-success {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    color: #000;
+}
+
+.btn-success:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+    color: #000;
+}
+
+.btn-success:disabled {
+    background: #333;
+    color: #666;
+    border: 1px solid #444;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Modal Visuals */
+.modal-content {
+    background-color: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+    color: var(--text-color);
+}
+
+.modal-header, .modal-footer {
+    border-color: var(--border-color);
+}
+
+.modal-title {
+    color: var(--primary-color);
+}
+
+/* Table Visuals */
+.table-custom {
+    --bs-table-color: #fff;
+    --bs-table-bg: #212529;
+    --bs-table-border-color: #373b3e;
+    --bs-table-striped-bg: #2c3034;
+    --bs-table-striped-color: #fff;
+    --bs-table-active-bg: #373b3e;
+    --bs-table-active-color: #fff;
+    --bs-table-hover-bg: #323539;
+    --bs-table-hover-color: #fff;
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+    background-color: var(--bs-table-bg);
+}
+
+.table-custom th {
+    background-color: #1a1e21;
+    color: var(--primary-color);
+}
+
+.table-hover tbody tr.active-row {
+    background-color: rgba(0, 255, 136, 0.2) !important;
+    border-left: 3px solid var(--primary-color);
+}
+.table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+/* Tags Visuals */
+.tag {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: rgba(0, 255, 136, 0.3);
+    color: var(--primary-color);
+}
+
+.tag.secondary {
+    background: rgba(0, 210, 255, 0.1);
+    border-color: rgba(0, 210, 255, 0.3);
+    color: var(--secondary-color);
+}
+
+/* Scrollbar Visuals */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Text & Headings */
+.tech-title {
+    color: var(--secondary-color);
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.main-title {
+    color: #fff;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(to right, #fff, #a5f3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.sub-title {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}

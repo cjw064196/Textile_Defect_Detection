@@ -1,0 +1,209 @@
+/* static/css/animations/tech-anim-1.css - Modern Lab Animations */
+
+/* Scan Animation - Clean Blue Line */
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(2, 132, 199, 0.2), transparent);
+    border-bottom: 2px solid var(--primary-color);
+    transform: translateY(-100%);
+    animation: scanMove 2s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
+}
+
+.image-preview-container.scanning .scan-overlay {
+    display: block;
+}
+
+@keyframes scanMove {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(100%); opacity: 0; }
+}
+
+/* Result Slide Up - Smooth Fade */
+.result-section {
+    display: none;
+    animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Spinner - Clean Circle */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.tech-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e2e8f0;
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: #475569;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    50% { opacity: 0.6; }
+}
+
+/* Empty State - Minimalist */
+.empty-state-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f8fafc;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.tech-grid-bg {
+    /* Hidden in this clean theme for simpler look */
+    display: none;
+}
+
+.center-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.ai-icon-circle {
+    width: 80px;
+    height: 80px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.ai-icon-circle i {
+    font-size: 32px;
+    color: var(--primary-color);
+}
+
+.floating-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatFade 6s infinite ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.floating-box span {
+    position: static; /* Reset absolute positioning */
+    background: none;
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0;
+}
+
+.floating-box::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+.box-1 {
+    top: 25%; left: 20%;
+    animation-delay: 0s;
+}
+
+.box-2 {
+    top: 60%; right: 20%;
+    animation-delay: 2s;
+}
+
+.box-3 {
+    bottom: 25%; left: 30%;
+    animation-delay: 4s;
+}
+
+@keyframes floatFade {
+    0% { opacity: 0; transform: translateY(10px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Card Entrance Animation */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary-color)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+}
+
+/* Auth Page Class Animations */
+.auth-card {
+    animation: cardEntrance 1s ease-out forwards;
+}
+
+.logo-icon {
+    animation: logoPulse 3s infinite;
+}
+
+.logo-circle {
+    animation: spin 10s linear infinite;
+}

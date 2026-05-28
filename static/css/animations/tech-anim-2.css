@@ -1,0 +1,239 @@
+/* static/css/animations/tech-anim-2.css - Deep Ocean Animations */
+
+/* Scan Animation - Slow and Smooth */
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(14, 165, 233, 0.15), transparent);
+    transform: translateY(-100%);
+    animation: scanMove 4s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
+}
+
+.image-preview-container.scanning .scan-overlay {
+    display: block;
+}
+
+@keyframes scanMove {
+    0% { transform: translateY(-100%); }
+    50% { transform: translateY(0%); }
+    100% { transform: translateY(100%); }
+}
+
+/* Result Slide Up - Gentle */
+.result-section {
+    display: none;
+    animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Spinner - Fluid */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(8, 51, 68, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.tech-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(14, 165, 233, 0.2);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.tech-spinner::before {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    border: 3px solid transparent;
+    border-top-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 3s linear infinite;
+}
+
+.loading-text {
+    color: var(--primary-color);
+    font-family: sans-serif;
+    letter-spacing: 1px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Empty State Animation - Floating */
+.empty-state-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(12, 74, 110, 0.5);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.tech-grid-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        radial-gradient(circle, rgba(14, 165, 233, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(1000px) rotateX(10deg);
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: perspective(1000px) rotateX(10deg) translateY(0); }
+    100% { transform: perspective(1000px) rotateX(10deg) translateY(-40px); }
+}
+
+.center-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.ai-icon-circle {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.2);
+    position: relative;
+}
+
+.ai-icon-circle::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--secondary-color);
+    border-bottom-color: var(--secondary-color);
+    animation: spin 12s linear infinite;
+}
+
+.ai-icon-circle i {
+    font-size: 32px;
+    color: var(--primary-color);
+}
+
+.floating-box {
+    position: absolute;
+    border: 1px solid var(--primary-color);
+    background: rgba(14, 165, 233, 0.05);
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatBox 10s infinite ease-in-out;
+}
+
+.floating-box span {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: normal;
+}
+
+.box-1 {
+    width: 120px; height: 80px; top: 25%; left: 15%;
+    animation-delay: 0s;
+    border-color: var(--secondary-color);
+}
+.box-1 span { background: var(--secondary-color); }
+
+.box-2 {
+    width: 100px; height: 100px; top: 55%; right: 25%;
+    animation-delay: 3s;
+}
+
+.box-3 {
+    width: 150px; height: 90px; bottom: 15%; left: 35%;
+    animation-delay: 6s;
+    border-color: #6366f1;
+}
+
+/* Card Entrance Animation */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary-color)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+}
+
+/* Auth Page Class Animations */
+.auth-card {
+    animation: cardEntrance 1s ease-out forwards;
+}
+
+.logo-icon {
+    animation: logoPulse 3s infinite;
+}
+
+.logo-circle {
+    animation: spin 10s linear infinite;
+}
+.box-3 span { background: #6366f1; }
+
+@keyframes floatBox {
+    0% { opacity: 0; transform: translateY(20px); }
+    20% { opacity: 0.8; transform: translateY(0); }
+    80% { opacity: 0.8; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}

@@ -1,0 +1,222 @@
+/* static/css/animations/tech-anim-4.css - Golden Era Animations */
+
+/* Scan Animation - Elegant Sweep */
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(245, 158, 11, 0.2), transparent);
+    transform: translateY(-100%);
+    animation: scanMove 3.5s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
+}
+
+.image-preview-container.scanning .scan-overlay {
+    display: block;
+}
+
+@keyframes scanMove {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* Result Slide Up - Fade Up */
+.result-section {
+    display: none;
+    animation: slideUp 1s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Spinner - Minimal */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(28, 25, 23, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.tech-spinner {
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.loading-text {
+    color: var(--primary-color);
+    font-family: serif;
+    font-style: italic;
+    animation: fadePulse 3s infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadePulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Empty State Animation - Subtle */
+.empty-state-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(28, 25, 23, 0.6);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.tech-grid-bg {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        linear-gradient(rgba(245, 158, 11, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245, 158, 11, 0.05) 1px, transparent 1px);
+    background-size: 100px 100px;
+    transform: perspective(800px) rotateX(15deg);
+    animation: gridMove 30s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { transform: perspective(800px) rotateX(15deg) translateY(0); }
+    100% { transform: perspective(800px) rotateX(15deg) translateY(-50px); }
+}
+
+.center-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.ai-icon-circle {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.1);
+    position: relative;
+}
+
+.ai-icon-circle::after {
+    content: '';
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border: 1px dotted var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 20s linear infinite;
+}
+
+.ai-icon-circle i {
+    font-size: 28px;
+    color: var(--primary-color);
+}
+
+.floating-box {
+    position: absolute;
+    border: 1px solid var(--primary-color);
+    background: rgba(245, 158, 11, 0.05);
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatBox 8s infinite ease-in-out;
+}
+
+.floating-box span {
+    position: absolute;
+    top: -15px;
+    left: 0;
+    color: var(--primary-color);
+    font-size: 11px;
+    font-family: serif;
+}
+
+.box-1 {
+    width: 120px; height: 80px; top: 20%; left: 20%;
+    animation-delay: 0s;
+}
+.box-1 span { color: var(--secondary-color); }
+
+.box-2 {
+    width: 100px; height: 100px; top: 60%; right: 20%;
+    animation-delay: 2.5s;
+}
+
+.box-3 {
+    width: 150px; height: 90px; bottom: 20%; left: 30%;
+    animation-delay: 5s;
+    border-color: #d97706;
+}
+.box-3 span { color: #d97706; }
+
+@keyframes floatBox {
+    0% { opacity: 0; transform: translateY(10px); }
+    20% { opacity: 0.6; transform: translateY(0); }
+    80% { opacity: 0.6; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Card Entrance Animation */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary-color)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+}
+
+/* Auth Page Class Animations */
+.auth-card {
+    animation: cardEntrance 1s ease-out forwards;
+}
+
+.logo-icon {
+    animation: logoPulse 3s infinite;
+}
+
+.logo-circle {
+    animation: spin 10s linear infinite;
+}

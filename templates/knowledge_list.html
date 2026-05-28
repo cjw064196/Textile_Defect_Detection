@@ -1,0 +1,192 @@
+{% extends "admin_dashboard.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+    <div>
+        <h2 class="h3 mb-0 fw-bold"><i class="fas fa-book me-2 text-primary"></i>知识库管理</h2>
+        <p class="text-muted mb-0">管理{{ login_texts.title }}的知识库内容</p>
+    </div>
+    <button class="btn btn-outline-success btn-tech" onclick="openAddModal()">
+        <i class="fas fa-plus me-2"></i>添加知识
+    </button>
+</div>
+
+<div class="card glass-card shadow mb-4 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">标题</th>
+                        <th style="width: 55%;">内容</th>
+                        <th style="width: 15%;">发布时间</th>
+                        <th style="width: 10%;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for knowledge in knowledge_list %}
+                    <tr>
+                        <td class="fw-bold">{{ knowledge.title }}</td>
+                        <td>
+                            <div class="text-truncate text-muted" style="max-width: 500px;" title="{{ knowledge.content }}">
+                                {{ knowledge.content }}
+                            </div>
+                        </td>
+                        <td class="small text-muted">{{ knowledge.publish_time }}</td>
+                        <td>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-primary btn-tech me-2" onclick="editKnowledge({{ knowledge.id }}, '{{ knowledge.title|escapejs }}', '{{ knowledge.content|escapejs }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-tech" onclick="deleteKnowledge({{ knowledge.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x mb-3 text-primary opacity-50"></i>
+                                <p>暂无知识库内容</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal fade" id="knowledgeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header border-bottom border-secondary">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-edit me-2 text-primary"></i><span>添加知识</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="knowledgeForm">
+                    <input type="hidden" id="knowledgeId">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control bg-transparent border-secondary" id="knowledgeTitle" required placeholder="请输入知识标题">
+                        <label for="knowledgeTitle" class="text-muted">标题</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control bg-transparent border-secondary" id="knowledgeContent" style="height: 300px" required placeholder="请输入详细内容..."></textarea>
+                        <label for="knowledgeContent" class="text-muted">内容</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-outline-light btn-tech" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-outline-primary btn-tech" onclick="submitKnowledge()">
+                    <i class="fas fa-save me-1"></i>保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let knowledgeModal;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        knowledgeModal = new bootstrap.Modal(document.getElementById('knowledgeModal'));
+    });
+
+    function openAddModal() {
+        document.getElementById("modalTitle").innerHTML = '<i class="fas fa-plus me-2 text-primary"></i><span>添加知识</span>';
+        document.getElementById("knowledgeId").value = "";
+        document.getElementById("knowledgeTitle").value = "";
+        document.getElementById("knowledgeContent").value = "";
+        knowledgeModal.show();
+    }
+
+    function editKnowledge(id, title, content) {
+        document.getElementById("modalTitle").innerHTML = '<i class="fas fa-edit me-2 text-primary"></i><span>编辑知识</span>';
+        document.getElementById("knowledgeId").value = id;
+        document.getElementById("knowledgeTitle").value = title;
+        document.getElementById("knowledgeContent").value = content;
+        knowledgeModal.show();
+    }
+
+    function submitKnowledge() {
+        const id = document.getElementById("knowledgeId").value;
+        const title = document.getElementById("knowledgeTitle").value;
+        const content = document.getElementById("knowledgeContent").value;
+        
+        if (!title || !content) {
+            alert("标题和内容不能为空");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        const url = id ? '/update_knowledge/' : '/add_knowledge/';
+
+        // Disable button to prevent double submit
+        const btn = document.querySelector('#knowledgeModal .btn-outline-primary');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+
+        fetch(url, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                knowledgeModal.hide();
+                window.location.reload();
+            } else {
+                alert(data.message || '操作失败');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('操作失败');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+    }
+
+    function deleteKnowledge(id) {
+        if (!confirm('确定要删除这条知识吗？')) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        fetch('/delete_knowledge/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message || '删除失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败');
+        });
+    }
+</script>
+{% endblock %}

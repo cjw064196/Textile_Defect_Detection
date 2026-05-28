@@ -1,0 +1,674 @@
+/* 基础重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* 整体布局 */
+.admin-container {
+    display: flex;
+    min-height: 100vh;
+    background: #f5f6fa;
+}
+
+/* 左侧菜单栏（新版设计） */
+.sidebar {
+    width: 280px;
+    background: #2d3436;
+    color: white;
+    position: fixed;
+    height: 100%;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+}
+
+.sidebar-header {
+    padding: 25px;
+    border-bottom: 1px solid #3c4245;
+}
+
+.logo-icon {
+    font-size: 32px;
+    color: #74b9ff;
+    margin-bottom: 15px;
+}
+
+.logo-text {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.menu {
+    padding: 20px 15px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    margin: 8px 0;
+    border-radius: 8px;
+    color: #dfe6e9;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-item:hover {
+    background: #3c4245;
+    transform: translateX(5px);
+}
+
+.menu-item.active {
+    background: #0984e3;
+    color: white;
+    box-shadow: 0 4px 6px rgba(9, 132, 227, 0.2);
+}
+
+.menu-icon {
+    font-size: 18px;
+    width: 30px;
+}
+
+.menu-text {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+/* 右侧内容区 */
+.content-wrapper {
+    flex: 1;
+    margin-left: 280px;
+    min-height: 100vh;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    font-size: 36px;
+    color: #636e72;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #2d3436;
+}
+
+.user-role {
+    font-size: 13px;
+    color: #636e72;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #d63031;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c23616;
+}
+
+/* 主要内容区 */
+.content-main {
+    padding: 30px;
+    background: #f5f6fa;
+    min-height: calc(100vh - 80px);
+}
+
+/* 数据表格增强样式 */
+.data-table {
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.data-table th {
+    background: #f8f9fa;
+    padding: 16px;
+    color: #2d3436;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 2px solid #f1f2f6;
+}
+
+.data-table td {
+    padding: 14px 16px;
+    color: #636e72;
+    border-bottom: 1px solid #f1f2f6;
+}
+
+.data-table tr:hover td {
+    background: #f8f9fa;
+}
+
+/* 全屏加载 */
+.global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: none; /* 默认隐藏 */
+}
+
+.loader-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 40px;
+    color: #0984e3;
+}
+
+/* 工具栏样式 */
+.toolbar {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* 模态框样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    margin: 15% auto;
+    padding: 20px;
+    width: 400px;
+    border-radius: 8px;
+}
+
+.modal .close {
+    float: right;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+/* 添加用户按钮 */
+.btn-add-user {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-add-user:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btn-add-user i {
+    font-size: 16px;
+}
+
+/* 模态框动画 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ==================== */
+/* 模态框容器和动画 */
+/* ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-dialog {
+    background: white;
+    margin: 5% auto;
+    width: 480px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    transform: translateY(-30px);
+    animation: slideDown 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ==================== */
+/* 头部样式 */
+/* ==================== */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.modal-header h3 {
+    color: #2d3436;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* ==================== */
+/* 关闭按钮 */
+/* ==================== */
+.btn-close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #636e72;
+    transition: all 0.3s ease;
+    line-height: 0;
+}
+
+.btn-close:hover {
+    color: #d63031;
+    transform: rotate(90deg) scale(1.1);
+}
+
+/* ==================== */
+/* 主体内容 */
+/* ==================== */
+.modal-body {
+    padding: 20px 28px 28px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    color: #495057;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+/* ==================== */
+/* 输入框样式 */
+/* ==================== */
+.input-field {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #2d3436;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.input-field:focus {
+    border-color: #74b9ff;
+    box-shadow: 0 0 0 3px rgba(116, 185, 255, 0.2);
+    background: white;
+    outline: none;
+}
+
+/* ==================== */
+/* 提交按钮 */
+/* ==================== */
+.btn-submit {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(116, 185, 255, 0.3);
+}
+
+.btn-submit i {
+    font-size: 14px;
+}
+
+/* ==================== */
+/* 响应式设计 */
+/* ==================== */
+@media (max-width: 576px) {
+    .modal-dialog {
+        width: 90%;
+        margin: 10% auto;
+    }
+    
+    .modal-header {
+        padding: 20px;
+    }
+    
+    .modal-body {
+        padding: 16px 20px 20px;
+    }
+    
+    .input-field {
+        padding: 12px 14px;
+    }
+}
+
+/* ==================== */
+/* 加载状态 */
+/* ==================== */
+.btn-submit.loading {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.btn-submit.loading i {
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ==================== */
+/* 操作按钮容器 */
+/* ==================== */
+.actions {
+    display: flex;
+    justify-content: flex-end; /* 关键属性：右对齐 */
+    gap: 8px;
+    width: 100%; /* 确保容器占满单元格宽度 */
+}
+
+/* ==================== */
+/* 通用按钮样式 */
+/* ==================== */
+.btn-edit, .btn-delete2 {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-edit span, .btn-delete2 span {
+    margin-left: 8px;
+}
+
+/* ==================== */
+/* 编辑按钮 */
+/* ==================== */
+.btn-edit {
+    background: #74b9ff;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #539fdf;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(116, 185, 255, 0.2);
+}
+
+/* ==================== */
+/* 删除按钮 */
+/* ==================== */
+.btn-delete2 {
+    background: #ff7675;
+    color: white;
+}
+
+.btn-delete2:hover {
+    background: #e25856;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(255, 118, 117, 0.2);
+}
+
+/* ==================== */
+/* 按钮禁用状态 */
+/* ==================== */
+.btn-edit:disabled, .btn-delete2:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 容器布局 */
+.record-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+/* 表格美化 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+.data-table th {
+    background: #f8f9fa;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
+    font-weight: 600;
+}
+
+.data-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+/* 图片缩略图 */
+.record-thumbnail {
+    width: 60px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    transition: transform 0.2s;
+}
+
+.record-thumbnail:hover {
+    transform: scale(1.8);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 10;
+}
+
+/* 杂质统计样式 */
+.impurity-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stat-item {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.9em;
+}
+
+/* 等级徽章 */
+.grade-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.grade-A { background: #d4edda; color: #155724; }
+.grade-B { background: #fff3cd; color: #856404; }
+.grade-C { background: #f8d7da; color: #721c24; }
+
+/* 处理建议列 */
+.advice-cell {
+    max-width: 250px;
+}
+
+.advice-text {
+    max-height: 100px;
+    overflow-y: auto;
+    padding-right: 8px;
+    color: #6c757d;
+    line-height: 1.5;
+}
+
+/* 操作按钮 */
+.btn-action {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin: 2px;
+}
+
+.btn-view {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.btn-delete {
+    background: #ffebee;
+    color: #d32f2f;
+}
+
+.btn-action:hover {
+    opacity: 0.8;
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+    .data-table th:nth-child(2),
+    .data-table td:nth-child(2) {
+        display: none;
+    }
+}
+
+/* 基础按钮样式 */
+.btn-action {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: white;
+    margin: 2px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* 查看按钮（蓝色背景） */
+.btn-view2 {
+    background: #2196F3; /* 蓝色 */
+}
+
+.btn-view2:hover {
+    background: #1976D2; /* 深蓝色 */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+}
+
+/* 删除按钮（红色背景） */
+.btn-delete {
+    background: #F44336; /* 红色 */
+}
+
+.btn-delete:hover {
+    background: #D32F2F; /* 深红色 */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+}

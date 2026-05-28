@@ -1,0 +1,282 @@
+/* static/css/themes/tech-dark-2.css - Deep Ocean */
+
+:root {
+    --primary-color: #0ea5e9;
+    --secondary-color: #06b6d4;
+    --bg-color: #0c4a6e;
+    --card-bg: rgba(12, 74, 110, 0.7);
+    --text-color: #f0f9ff;
+    --border-color: rgba(125, 211, 252, 0.2);
+    
+    /* Bootstrap Variable Overrides */
+    --bs-primary: var(--primary-color);
+    --bs-secondary: var(--secondary-color);
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+}
+
+/* Custom Theme Utility Classes */
+.theme-overlay-bg {
+    background-color: rgba(0, 20, 40, 0.3);
+}
+
+.theme-text-contrast {
+    color: #fff !important;
+}
+
+body {
+    background-color: var(--bg-color);
+    background-image: linear-gradient(to bottom, #075985 0%, #0c4a6e 100%);
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Background Canvas */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Tech Grid Overlay - Wavy */
+.grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Navbar Visuals */
+.navbar-custom {
+    background: rgba(8, 51, 68, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    color: #fff !important;
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+    filter: drop-shadow(0 0 8px var(--primary-color));
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+    text-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+}
+
+.nav-link::after {
+    background: var(--primary-color);
+}
+
+/* Upload Card Visuals */
+.upload-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15);
+    border-radius: 12px;
+}
+
+.upload-card::before {
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+}
+
+/* Table Visuals */
+.table-custom {
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-bg: transparent;
+    --bs-table-border-color: var(--border-color);
+    --bs-table-striped-bg: rgba(14, 165, 233, 0.05);
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-bg: rgba(14, 165, 233, 0.1);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-bg: rgba(14, 165, 233, 0.1);
+    --bs-table-hover-color: var(--bs-body-color);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+    background-color: var(--bs-table-bg);
+}
+
+.table-custom th {
+    background-color: rgba(14, 165, 233, 0.1);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Scrollbar Visuals */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+/* --- Added Component Overrides for Complete Theme Coverage (Dark Tech Style) --- */
+
+/* Image Preview Visuals */
+.image-preview-container {
+    background: rgba(0, 0, 0, 0.2);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+.image-preview-container.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2) inset;
+}
+
+/* Corner Marker Visuals */
+.corner-marker {
+    border-color: var(--primary-color);
+}
+
+/* Result Card Visuals */
+.result-card {
+    background: rgba(12, 74, 110, 0.4);
+    border: 1px solid var(--secondary-color);
+}
+
+.result-card::after {
+    background: var(--bg-color);
+    color: var(--secondary-color);
+}
+
+/* History Container Visuals */
+.history-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+}
+
+.history-header {
+    border-bottom-color: var(--border-color);
+}
+
+/* Auth Page Specifics */
+.auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 40px rgba(14, 165, 233, 0.1);
+}
+
+/* Form Controls Visuals */
+.form-range {
+    accent-color: var(--primary-color);
+}
+
+.form-select,
+.form-control {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+/* Specific override for floating labels in auth forms to prevent white background */
+.form-floating-auth .form-control {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: #fff !important;
+}
+
+.form-floating-auth .form-control:focus {
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
+}
+
+.form-floating-auth label {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.form-floating-auth .form-control:-webkit-autofill,
+.form-floating-auth .form-control:-webkit-autofill:hover, 
+.form-floating-auth .form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff;
+    -webkit-box-shadow: 0 0 0px 1000px #0f172a inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.form-select:focus,
+.form-control:focus {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.2);
+}
+
+.form-check-input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-control::placeholder {
+    color: rgba(125, 211, 252, 0.4);
+}
+
+/* Button Visuals */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+}
+
+.coord-panel .form-control {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.coord-panel .form-control:focus {
+    background: rgba(0, 0, 0, 0.8);
+    color: var(--text-color);
+}
+
+.coord-panel .input-group-text {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-success {
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+    color: #fff;
+}
+
+.btn-success:disabled {
+    background: #1e293b;
+    color: #64748b;
+    border: 1px solid #334155;
+}

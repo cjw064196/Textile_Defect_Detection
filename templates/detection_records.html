@@ -1,0 +1,215 @@
+{% extends "admin_dashboard.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in-up">
+    <div>
+        <h2 class="h3 mb-0 fw-bold"><i class="fas fa-history me-2 text-primary"></i>识别检测记录</h2>
+        <p class="text-muted mb-0">查看所有用户的识别历史记录</p>
+    </div>
+    <div>
+        <button id="batchDeleteBtn" class="btn btn-danger" style="display: none;" onclick="batchDelete()">
+            <i class="fas fa-trash me-2"></i>批量删除 (<span id="selectedCount">0</span>)
+        </button>
+    </div>
+</div>
+
+<div class="card glass-card shadow mb-4 fade-in-up" style="animation-delay: 0.1s;">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 50px;">
+                            <input type="checkbox" id="selectAll" class="form-check-input">
+                        </th>
+                        <th class="text-center" style="width: 300px;">图片对比 (原图 / 结果)</th>
+                        <th class="text-center" style="width: 100px;">检测ID</th>
+                        <th class="text-center">用户</th>
+                        <th class="text-center">检测时间</th>
+                        <th class="text-center" style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in records %}
+                    <tr id="record-row-{{ record.id }}">
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input record-checkbox" value="{{ record.id }}">
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center gap-3">
+                                <div class="position-relative image-container">
+                                    <img src="{{ record.image_url }}" 
+                                         class="img-thumbnail record-image" 
+                                         alt="原图"
+                                         style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                                         onclick="window.open(this.src, '_blank')">
+                                    <span class="position-absolute top-0 start-0 badge bg-secondary m-1 border border-light">原图</span>
+                                </div>
+                                <div class="position-relative image-container">
+                                    {% if record.is_video %}
+                                    <video src="{{ record.image_result_path }}" 
+                                         class="img-thumbnail record-image" 
+                                         style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                                         onclick="window.open(this.src, '_blank')"
+                                         muted loop onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;"></video>
+                                    <span class="position-absolute top-0 start-0 badge bg-success m-1 border border-light">视频</span>
+                                    {% else %}
+                                    <img src="{{ record.image_result_path }}" 
+                                         class="img-thumbnail record-image" 
+                                         alt="检测结果"
+                                         style="width: 100px; height: 100px; object-fit: cover; cursor: pointer;"
+                                         onclick="window.open(this.src, '_blank')">
+                                    <span class="position-absolute top-0 start-0 badge bg-success m-1 border border-light">结果</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-center fw-bold text-primary">#{{ record.id }}</td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <img src="{{ record.avatar_url }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;" alt="用户头像">
+                                <span class="fw-bold">{{ record.user }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <i class="far fa-clock me-1"></i>{{ record.detection_time }}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecord({{ record.id }})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-white-50">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox fa-3x mb-3 text-primary opacity-50"></i>
+                                <p>暂无检测记录</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Image Styles */
+    .record-image {
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border-color: rgba(255, 255, 255, 0.2);
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    .record-image:hover {
+        transform: scale(1.1);
+        z-index: 10;
+        box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+        border-color: var(--primary-color);
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.record-checkbox');
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    const selectedCount = document.getElementById('selectedCount');
+
+    // Update UI state
+    function updateState() {
+        const checked = document.querySelectorAll('.record-checkbox:checked');
+        selectedCount.textContent = checked.length;
+        batchDeleteBtn.style.display = checked.length > 0 ? 'inline-block' : 'none';
+        
+        // Update select all checkbox state
+        if (checked.length === 0) {
+            selectAll.checked = false;
+            selectAll.indeterminate = false;
+        } else if (checked.length === checkboxes.length) {
+            selectAll.checked = true;
+            selectAll.indeterminate = false;
+        } else {
+            selectAll.checked = false;
+            selectAll.indeterminate = true;
+        }
+    }
+
+    // Select All handler
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateState();
+    });
+
+    // Individual checkbox handler
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateState);
+    });
+});
+
+// Single Delete
+async function deleteRecord(id) {
+    if (!confirm('确定要删除这条记录吗？此操作不可恢复。')) return;
+    
+    try {
+        const response = await fetch('{% url "delete_detection_records" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ ids: [id] })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            const row = document.getElementById(`record-row-${id}`);
+            row.style.transition = 'all 0.5s ease';
+            row.style.opacity = '0';
+            setTimeout(() => {
+                row.remove();
+                // Check if table is empty
+                const remaining = document.querySelectorAll('.record-checkbox');
+                if (remaining.length === 0) location.reload();
+            }, 500);
+        } else {
+            alert('删除失败: ' + data.message);
+        }
+    } catch (e) {
+        alert('删除请求出错: ' + e);
+    }
+}
+
+// Batch Delete
+async function batchDelete() {
+    const checked = document.querySelectorAll('.record-checkbox:checked');
+    if (checked.length === 0) return;
+    
+    if (!confirm(`确定要删除选中的 ${checked.length} 条记录吗？此操作不可恢复。`)) return;
+    
+    const ids = Array.from(checked).map(cb => parseInt(cb.value));
+    
+    try {
+        const response = await fetch('{% url "delete_detection_records" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ ids: ids })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            alert('删除成功');
+            location.reload();
+        } else {
+            alert('删除失败: ' + data.message);
+        }
+    } catch (e) {
+        alert('删除请求出错: ' + e);
+    }
+}
+</script>
+{% endblock %}

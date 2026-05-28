@@ -1,0 +1,356 @@
+/* static/css/base.css */
+
+/* Navbar Structure */
+.navbar-custom {
+    padding: 1rem 0;
+    position: relative;
+    z-index: 1050;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+}
+
+.nav-link {
+    position: relative;
+    transition: all 0.3s;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    transition: width 0.3s;
+}
+
+.nav-link:hover::after, .nav-link.active::after {
+    width: 100%;
+}
+
+/* Upload/Scan Section Structure */
+.upload-card {
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+}
+
+/* Image Preview Container Structure */
+.image-preview-container {
+    width: 100%;
+    height: 90vh;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 2px dashed; /* color defined in theme */
+    position: relative;
+    transition: all 0.3s;
+}
+
+#previewImage, #sourceVideo {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#previewImage {
+    object-fit: contain;
+}
+
+#sourceVideo {
+    object-fit: cover;
+}
+
+/* Corner Markers Structure */
+.corner-marker {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid; /* color in theme */
+    transition: all 0.3s;
+}
+.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+/* Result Section Structure */
+.result-card {
+    border-radius: 12px;
+    position: relative;
+}
+
+.result-card::after {
+    content: 'ANALYSIS COMPLETE';
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    font-size: 0.7rem;
+    padding: 0 10px;
+    letter-spacing: 2px;
+}
+
+/* History Section Structure */
+.history-container {
+    border-radius: 15px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+}
+
+.history-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid; /* color in theme */
+}
+
+.history-list {
+    max-height: 500px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Grid Layout Support */
+.grid {
+    display: grid;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+/* Form Controls Structure */
+.form-select,
+.form-control {
+    border-radius: 8px;
+}
+
+/* Button Structure */
+.btn {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-lg {
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-success {
+    border: none;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+}
+
+/* Modal Structure */
+.modal-header, .modal-footer {
+    border-color: inherit; /* theme handles border color on content */
+}
+
+.modal-title {
+    font-weight: bold;
+}
+
+/* Feature Tags Structure */
+.feature-tags {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.tag {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid;
+}
+
+/* Authentication Page Structure (Login/Register) */
+.auth-body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+#bg-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+.grid-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: 50px 50px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.login-container, .register-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 420px;
+    perspective: 1000px;
+}
+.register-container {
+    max-width: 500px;
+}
+
+.auth-card {
+    border-radius: 20px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    /* animation handled in tech-anim.css */
+}
+
+.auth-card-header {
+    padding: 2.5rem 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.auth-card-body {
+    padding: 2rem 2.5rem 3rem;
+}
+
+.logo-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+}
+
+.logo-icon {
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.register-logo-icon {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.logo-circle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 50%;
+    /* animation in tech-anim */
+}
+
+.register-logo-circle {
+    border-color: var(--secondary-color);
+    animation-direction: reverse;
+}
+
+.title-text {
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle-text {
+    font-size: 0.9rem;
+    font-weight: 300;
+}
+
+.form-floating-auth {
+    margin-bottom: 1.5rem;
+}
+
+.btn-auth {
+    font-weight: 700;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 100%;
+    margin-top: 1rem;
+    position: relative;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .h-75 {
+        height: 50vh !important;
+    }
+}
+
+/* Utility Classes */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--card-bg);
+}
+
+.preview-area {
+    height: 55vh;
+    min-height: 400px;
+}
+
+.scrollable-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.text-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.category-label {
+    color: var(--text-color) !important;
+}

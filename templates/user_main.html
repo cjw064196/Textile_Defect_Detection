@@ -1,0 +1,2425 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能识别终端 - {{ login_texts.title }}</title>
+    <!-- 引入Bootstrap和Font Awesome -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <link href="{% static theme_config.theme_css %}" rel="stylesheet" id="theme-style">
+    <link href="{% static theme_config.anim_css %}" rel="stylesheet" id="anim-style">
+    <style>
+        .coord-panel .form-control {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+
+        .coord-panel .form-control:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        .coord-panel .input-group-text {
+            background-color: transparent;
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    <!-- Tech Grid Overlay -->
+    <div class="grid-overlay"></div>
+
+<!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom mb-4">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="fas fa-robot me-2"></i>{{ main_texts.title }}
+            </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" id="navHome"><i class="fas fa-home me-1"></i>首页</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" href="{% url 'user_knowledge' %}"><i class="fas fa-book me-1"></i>知识库</a>
+                </li> -->
+                <li class="nav-item ms-lg-3 dropdown">
+                    <button class="btn btn-light text-success btn-sm rounded-pill px-3 dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if request.user.avatar %}
+                            <img src="{{ request.user.avatar.url }}" class="rounded-circle" width="24" height="24" style="object-fit: cover;">
+                        {% else %}
+                            <i class="fas fa-user me-1"></i>
+                        {% endif %}
+                        {{ request.user.username }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i class="fas fa-user-edit me-2"></i>个人信息</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" id="logoutLink"><i class="fas fa-sign-out-alt me-2"></i>退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid p-3">
+    <div class="row g-3">
+        <!-- 左侧功能按钮区 -->
+        <div class="col-lg-2">
+            <div class="upload-card h-100 p-3">
+                <h5 class="mb-4 fw-bold text-secondary"><i class="fas fa-cog me-2"></i>功能选择</h5>
+                
+                <div class="d-grid gap-3">
+                    <button id="btn-open-image" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-image me-2"></i>图像选择
+                    </button>
+                    <button id="btn-open-video" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-video me-2"></i>视频选择
+                    </button>
+                    <button id="btn-open-folder" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-folder me-2"></i>文件夹选择
+                    </button>
+                    <button id="cameraBtn" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-camera me-2"></i>摄像头
+                    </button>
+                    <button id="modelSelectBtn" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-brain me-2"></i>模型选择
+                    </button>
+                    <button id="btn-open-history" class="btn btn-outline-primary btn-lg text-start">
+                        <i class="fas fa-history me-2"></i>识别历史
+                    </button>
+                    <!-- Hidden Inputs -->
+                    <input type="file" id="modelInput" accept=".pt,.pth" style="display: none;">
+                </div>
+
+            </div>
+        </div>
+        
+        <!-- 中间主显示区 -->
+        <div class="col-lg-7">
+            <div id="mainWorkArea">
+            <!-- 控制条 -->
+            <div class="upload-card p-4 mb-3">
+                <div class="d-flex flex-wrap justify-content-between gap-3 align-items-center">
+                    <div class="flex-grow-1">
+                        <label class="text-primary small fw-semibold">置信度 (Conf):</label>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <input type="range" id="confidenceSlider" min="0" max="1" step="0.1" value="0.5" class="form-range w-75">
+                            <span id="confidenceValue" class="fw-bold text-primary">0.5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-grow-1">
+                        <label class="text-primary small fw-semibold">交并比 (IoU):</label>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <input type="range" id="iouSlider" min="0" max="1" step="0.1" value="0.5" class="form-range w-75">
+                            <span id="iouValue" class="fw-bold text-primary">0.5</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="text-primary small fw-semibold">检测耗时:</label>
+                        <div class="mt-1">
+                            <span id="detectionTime" class="fw-bold text-primary">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="voiceAlert">
+                        <label class="form-check-label text-primary" for="voiceAlert">语音播报</label>
+                    </div>
+                    
+                    <div>
+                        <label class="text-primary small fw-semibold">检测目标:</label>
+                        <div class="mt-1">
+                            <span id="detectionCount" class="fw-bold text-primary">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 隐藏的文件输入 -->
+            <input type="file" id="imageInput" accept="image/*" style="display: none;"/>
+            <input type="file" id="videoInput" accept="video/*" style="display: none;"/>
+            <input type="file" id="folderInput" webkitdirectory directory multiple style="display: none;"/>
+            
+            <!-- 图像显示区 -->
+            <div class="upload-card p-3 preview-area">
+                <div class="position-relative h-100 d-flex gap-3">
+                    <!-- Original Image/Video Container -->
+                    <div id="image_container" class="image-preview-container flex-grow-1 h-100 d-flex justify-content-center align-items-center theme-overlay-bg rounded overflow-hidden position-relative">
+                        <!-- Empty State Animation -->
+                        <div id="emptyState" class="empty-state-overlay">
+                            <div class="tech-grid-bg"></div>
+                            <div class="floating-box box-1"><span>Person 98%</span></div>
+                            <div class="floating-box box-2"><span>Car 95%</span></div>
+                            <div class="floating-box box-3"><span>Dog 92%</span></div>
+                            
+                            <div class="center-content">
+                                <div class="ai-icon-circle">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <h2 class="tech-title">YOLO</h2>
+                                <h1 class="main-title">实时目标检测</h1>
+                                <p class="sub-title">{{ login_texts.title }}<br>快速 · 精准 · 高效</p>
+                                <div class="feature-tags">
+                                    <span class="tag"><i class="fas fa-bolt"></i> 毫秒级</span>
+                                    <span class="tag secondary"><i class="fas fa-crosshairs"></i> 高精度</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <img id="previewImage" src="{% static 'placeholder-image.jpg' %}" alt="请上传图片" style="width: 100%; height: 100%; object-fit: contain; display: none;">
+                        <video id="sourceVideo" style="display: none;" playsinline></video>
+                        <canvas id="previewCanvas" style="width: 100%; height: 100%; object-fit: contain; display: none;"></canvas>
+                        <div id="loadingOverlay" class="loading-overlay">
+                            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="position-absolute top-0 start-0 m-2 badge bg-primary">原始图像</div>
+                    </div>
+                    
+                    <!-- Result/Annotated Container (Initially Hidden or Placeholder) -->
+                    <div id="result_container" class="image-preview-container flex-grow-1 h-100 justify-content-center align-items-center theme-overlay-bg rounded overflow-hidden position-relative" style="display: none;">
+                        <img id="resultImage" src="" style="width: 100%; height: 100%; object-fit: contain;">
+                        <video id="resultVideo" controls style="display:none; width: 100%; height: 100%; object-fit: contain;"></video>
+                        <div class="position-absolute top-0 start-0 m-2 badge bg-success">检测结果</div>
+                    </div>
+                    
+                    <!-- Hidden Camera Container (Now integrated into image_container via sourceVideo) -->
+                    <div id="camera_container" class="image-preview-container h-100" hidden>
+                         <!-- Deprecated: merged into sourceVideo logic -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 处理按钮 -->
+            <div class="mt-3 text-center d-flex justify-content-center gap-3">
+                <button id="processBtn" class="btn btn-success btn-lg px-5" disabled>
+                    <i class="fas fa-play-circle me-2"></i>开始识别
+                </button>
+                <button id="stopBtn" class="btn btn-danger btn-lg px-5" style="display: none;">
+                    <i class="fas fa-stop-circle me-2"></i>停止识别
+                </button>
+                <button id="pauseBtn" class="btn btn-warning btn-lg px-5" style="display: none;">
+                    <i class="fas fa-pause-circle me-2"></i>暂停播放
+                </button>
+            </div>
+            
+            <!-- 识别目标列表 -->
+            <div class="mt-4">
+                <h4 class="fw-bold mb-3 text-secondary"><i class="fas fa-list me-2"></i>识别目标列表</h4>
+                <div id="detectionList" class="upload-card p-3">
+                    <div class="table-responsive custom-scrollbar scrollable-list">
+                        <table class="table table-hover table-custom mb-0">
+                            <thead class="sticky-header">
+                                <tr>
+                                    <th>序号</th>
+                                    <th>文件路径</th>
+                                    <th>识别类型</th>
+                                    <th>置信度</th>
+                                    <th>坐标</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detectionTableBody">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">暂无识别目标</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 结果显示区 -->
+            <div id="resultSection" class="result-section mt-4">
+                <div class="upload-card p-4">
+                    <h4 class="fw-bold mb-3 text-center text-primary"><i class="fas fa-check-circle me-2"></i>识别结果</h4>
+                    <div class="result-card p-4 mb-3">
+                        <h5 class="fw-bold text-secondary">检测类别</h5>
+                        <p id="pestName" class="fs-4">未知</p>
+                    </div>
+                    <div class="result-card p-4">
+                        <h5 class="fw-bold text-secondary">相关建议</h5>
+                        <p id="controlAdvice">请上传图片进行识别</p>
+                    </div>
+                </div>
+            </div>
+            </div> <!-- End of mainWorkArea -->
+            
+            <!-- 历史记录 (New Module) -->
+            <div id="historyModule" style="display:none;">
+                <div class="upload-card p-4">
+                    <h4 class="fw-bold mb-3 text-secondary"><i class="fas fa-history me-2"></i>识别历史</h4>
+                    <div id="historyContainer" class="history-container" style="min-height: 500px;">
+                        <div class="history-header">
+                            <h6 class="fw-bold">识别记录</h6>
+                        </div>
+                        <div class="history-list p-3">
+                            <div class="text-center text-muted mt-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="mt-2">正在加载历史记录...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 右侧信息区 -->
+        <div class="col-lg-3" id="rightInfoPanel">
+            <!-- 系统信息 -->
+            <div class="upload-card p-3 mb-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="bg-primary rounded-circle p-3">
+                        <i class="fas fa-robot fa-lg theme-text-contrast"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">YOLO检测系统</h6>
+                        <p class="text-muted small mb-0">{{ login_texts.title }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 类别统计 -->
+            <div class="upload-card p-3 mb-3">
+                <h6 class="fw-bold mb-3 text-secondary"><i class="fas fa-chart-pie me-2"></i>类别统计</h6>
+                <div id="categoryStatsContainer">
+                    <div class="text-center text-muted small py-3">暂无数据</div>
+                </div>
+            </div>
+            
+            <!-- 类别过滤 -->
+            <div class="upload-card p-3 mb-3">
+                <h6 class="fw-bold mb-3 text-secondary"><i class="fas fa-filter me-2"></i>类别过滤</h6>
+                
+                <select class="form-select mb-3" id="categoryFilter">
+                    <option value="">显示所有类别</option>
+                </select>
+            </div>
+            
+            <!-- 置信度 -->
+            <div class="upload-card p-3 mb-3">
+                <h6 class="fw-bold mb-3 text-secondary"><i class="fas fa-gauge me-2"></i>检测记录</h6>
+                
+                <!-- 检测类别 -->
+                <div class="mb-3">
+                    <div class="text-secondary mb-1 text-label">检测类别:</div>
+                    <div class="input-group">
+                        <input type="text" id="detectionClass" class="form-control" value="未选择" readonly>
+                    </div>
+                </div>
+                
+                <!-- 置信度值 -->
+                <div class="mb-3">
+                    <div class="text-secondary mb-1" style="font-size: 14px; font-weight: 500;">置信度:</div>
+                    <div class="input-group">
+                        <input type="text" id="confidenceDisplay" class="form-control" value="0.00" readonly>
+                    </div>
+                </div>
+                
+                <!-- 坐标位置 -->
+                <div class="mb-3">
+                    <div class="text-secondary mb-1" style="font-size: 14px; font-weight: 500;">坐标位置:</div>
+                    <div class="grid grid-cols-2 gap-2 coord-panel">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">X:</span>
+                            <input type="text" id="coordX" class="form-control" value="0">
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">Y:</span>
+                            <input type="text" id="coordY" class="form-control" value="0">
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">宽:</span>
+                            <input type="text" id="coordWidth" class="form-control" value="0">
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">高:</span>
+                            <input type="text" id="coordHeight" class="form-control" value="0">
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="exportResult()" class="btn btn-success w-100 mb-2">
+                    <i class="fas fa-download me-2"></i>结果导出
+                </button>
+                <button onclick="saveResult()" class="btn btn-primary w-100">
+                    <i class="fas fa-save me-2"></i>结果保存
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Progress Overlay -->
+<div id="saveProgressOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <div class="card p-4 shadow-lg" style="width: 400px; max-width: 90%;">
+        <div class="text-center mb-3">
+            <i class="fas fa-save fa-3x text-primary mb-3"></i>
+            <h5 class="fw-bold" id="saveProgressTitle">正在保存检测记录</h5>
+        </div>
+        <div class="progress mb-3" style="height: 25px;">
+            <div id="saveProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 100%">处理中...</div>
+        </div>
+        <p class="text-center text-muted mb-0" id="saveProgressText">请勿关闭窗口，正在生成检测视频...</p>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="{% static 'js/xlsx.full.min.js' %}"></script>
+<script src="{% static 'js/jszip.min.js' %}"></script>
+<script src="{% static 'js/FileSaver.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script>
+    // Particle Animation
+    const canvas = document.getElementById('bg-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+        
+        // Configuration
+        const particleCount = 40; 
+        
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 1;
+                const style = getComputedStyle(document.documentElement);
+                const primaryColor = style.getPropertyValue('--primary-color').trim() || '#00ff88';
+                const secondaryColor = style.getPropertyValue('--secondary-color').trim() || '#00d2ff';
+                this.color = Math.random() > 0.5 ? primaryColor : secondaryColor;
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+            }
+
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles();
+        });
+
+        // Initialize Animation
+        resize();
+        initParticles();
+        animate();
+    }
+
+    // Elements
+    const imageInput = document.getElementById('imageInput');
+    const videoInput = document.getElementById('videoInput');
+    const folderInput = document.getElementById('folderInput');
+    const previewImage = document.getElementById('previewImage');
+    const processBtn = document.getElementById('processBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const resultSection = document.getElementById('resultSection');
+    const pestNameEl = document.getElementById('pestName');
+    const controlAdviceEl = document.getElementById('controlAdvice');
+    const emptyState = document.getElementById('emptyState');
+    
+    // Upload Video
+    async function uploadVideo(file) {
+        showLoading(true);
+        const formData = new FormData();
+        formData.append('video', file);
+
+        try {
+            const response = await fetch('/upload_video/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.message || '上传失败');
+            
+            // Store the server path for later processing
+            currentServerVideoPath = data.video_path;
+            console.log("Video uploaded:", currentServerVideoPath);
+            
+        } catch (error) {
+            console.error('Video upload error:', error);
+            alert(`上传视频失败: ${error.message}`);
+        } finally {
+            showLoading(false);
+            videoInput.value = ''; // Reset input
+        }
+    }
+
+    // Camera/Video Elements
+    const cameraBtn = document.getElementById('cameraBtn');
+    const sourceVideo = document.getElementById('sourceVideo');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const previewCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
+    const resultContainer = document.getElementById('result_container');
+    const resultImage = document.getElementById('resultImage');
+    const resultVideo = document.getElementById('resultVideo');
+    const imageContainer = document.getElementById('image_container');
+    
+    let mediaStream = null;
+    let isProcessing = false;
+    let processingInterval = null;
+    let currentMode = 'image'; // image, video, camera, folder
+    let currentFilePath = ''; // 存储当前选择的文件路径
+    let currentServerVideoPath = ''; // 存储上传后的视频服务端路径
+    let folderImages = []; // Array of image files for folder mode
+    let currentFolderIndex = 0; // Current index in folderImages
+    let isFolderProcessing = false;
+    let currentDetections = []; // 保存当前检测结果，用于过滤
+    let currentFilteredDetections = []; // 保存过滤后的检测结果
+    
+    // Filtering State
+    let currentProcessedImage = null; // Store server processed image
+    let currentOriginalImageUrl = null; // Store original image URL
+    let selectedDetectionIndex = -1; // -1 means all showed
+    
+    // New variables for Export/Save functionality
+    let exportData = []; 
+    let recordingSessionId = null;
+    let folderResults = [];
+    let lastVideoUrl = null;
+    
+    // Recording timing variables
+    let recordingStartTime = 0;
+    let recordingPauseStartTime = 0;
+    let totalPausedTime = 0;
+
+    // Audio Alert
+    const alarmAudio = new Audio("{% static 'alarm.WAV' %}");
+    alarmAudio.preload = 'none';
+    
+    // Slider Elements
+    const confidenceSlider = document.getElementById('confidenceSlider');
+    const confidenceValue = document.getElementById('confidenceValue');
+    const iouSlider = document.getElementById('iouSlider');
+    const iouValue = document.getElementById('iouValue');
+    
+    // Slider Event Listeners
+    if (confidenceSlider && confidenceValue) {
+        confidenceSlider.addEventListener('input', () => {
+            confidenceValue.textContent = confidenceSlider.value;
+        });
+    }
+    
+    if (iouSlider && iouValue) {
+        iouSlider.addEventListener('input', () => {
+            iouValue.textContent = iouSlider.value;
+        });
+    }
+    
+    // Backend color palette (matches yolo_detection.py)
+    const COLOR_PALETTE = [
+        '#FF5733', '#33FF57', '#3357FF', '#F333FF', '#FF33A8', 
+        '#33FFF6', '#FFD633', '#A833FF', '#FF3333', '#00FF00', 
+        '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FF0000', 
+        '#FF8000', '#800080', '#008080', '#808000', '#000080'
+    ];
+
+    function getColor(cls_id, className) {
+        if (cls_id !== undefined && cls_id !== null) {
+            return COLOR_PALETTE[cls_id % COLOR_PALETTE.length];
+        }
+        // Fallback to hash of name if no ID
+        let hash = 0;
+        for (let i = 0; i < className.length; i++) {
+            hash = className.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % COLOR_PALETTE.length;
+        return COLOR_PALETTE[index];
+    }
+
+    // Initial Reset
+        resetUI();
+        
+        // Handle File Selection
+        function handleOpenImage() {
+        resetUI();
+        imageInput.click();
+    }
+    
+    function handleOpenVideo() {
+        resetUI();
+        videoInput.click();
+    }
+    
+    function handleOpenFolder() {
+        resetUI();
+        folderInput.click();
+    }
+    
+    function handleOpenHistory() {
+        resetUI();
+        document.getElementById('mainWorkArea').style.display = 'none';
+        document.getElementById('historyModule').style.display = 'block';
+        const rightPanel = document.getElementById('rightInfoPanel');
+        if (rightPanel) rightPanel.style.display = 'none';
+        refreshHistory();
+    }
+
+    // Event Listeners for Left Menu Buttons
+    const btnOpenImage = document.getElementById('btn-open-image');
+    if (btnOpenImage) btnOpenImage.addEventListener('click', handleOpenImage);
+    
+    const btnOpenVideo = document.getElementById('btn-open-video');
+    if (btnOpenVideo) btnOpenVideo.addEventListener('click', handleOpenVideo);
+    
+    const btnOpenFolder = document.getElementById('btn-open-folder');
+    if (btnOpenFolder) btnOpenFolder.addEventListener('click', handleOpenFolder);
+    
+    const btnOpenHistory = document.getElementById('btn-open-history');
+    if (btnOpenHistory) btnOpenHistory.addEventListener('click', handleOpenHistory);
+    
+    const navHome = document.getElementById('navHome');
+    if (navHome) navHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetUI();
+    });
+
+    // Reset UI for new selection
+    function resetUI() {
+        // Stop recording if active
+        if (recordingSessionId) {
+            manageRecording('stop'); // Fire and forget
+            recordingSessionId = null;
+        }
+
+        // Stop any running video/camera
+        if (mediaStream) {
+            mediaStream.getTracks().forEach(track => track.stop());
+            mediaStream = null;
+        }
+        sourceVideo.pause();
+        sourceVideo.src = "";
+        sourceVideo.srcObject = null;
+        
+        // Stop processing if running
+        stopVideoProcessing('stop');
+        isFolderProcessing = false;
+        
+        // Reset Views
+        const mainWorkArea = document.getElementById('mainWorkArea');
+        const historyModule = document.getElementById('historyModule');
+        if(mainWorkArea) mainWorkArea.style.display = 'block';
+        if(historyModule) historyModule.style.display = 'none';
+        
+        const rightPanel = document.getElementById('rightInfoPanel');
+        if (rightPanel) rightPanel.style.display = 'block';
+
+        // Show empty state, hide others
+        if(emptyState) emptyState.style.display = 'flex';
+        previewImage.style.display = 'none';
+        sourceVideo.style.display = 'none';
+        if(previewCanvas) previewCanvas.style.display = 'none';
+        
+        // Ensure result container is hidden
+        resultContainer.style.display = 'none';
+        resultContainer.classList.remove('d-flex');
+        
+        resultImage.src = "";
+        if(resultVideo) {
+             resultVideo.pause();
+             resultVideo.src = "";
+             resultVideo.style.display = 'none';
+             resultImage.style.display = 'block';
+        }
+        
+        // Reset Buttons
+        processBtn.disabled = true;
+        stopBtn.style.display = 'none';
+        pauseBtn.style.display = 'none';
+        processBtn.style.display = 'inline-block';
+        processBtn.innerHTML = '<i class="fas fa-play-circle me-2"></i>开始识别'; // Reset text
+        
+        // Clear results
+        pestNameEl.textContent = "未知";
+        controlAdviceEl.textContent = "请上传图片进行识别";
+        resultSection.style.display = 'none';
+        const detectionTimeEl = document.getElementById('detectionTime');
+        if (detectionTimeEl) detectionTimeEl.textContent = "-";
+        const detectionCountEl = document.getElementById('detectionCount');
+        if (detectionCountEl) detectionCountEl.textContent = "-";
+        const tableBody = document.getElementById('detectionTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">暂无识别目标</td></tr>';
+        }
+        const statsContainer = document.getElementById('categoryStatsContainer');
+        if (statsContainer) {
+            statsContainer.innerHTML = '<div class="text-center text-muted small py-3">暂无数据</div>';
+        }
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) categoryFilter.value = "";
+        const classDisplay = document.getElementById('detectionClass');
+        if (classDisplay) classDisplay.value = "未选择";
+        const confidenceDisplay = document.getElementById('confidenceDisplay');
+        if (confidenceDisplay) confidenceDisplay.value = "0.00";
+        const xInput = document.getElementById('coordX');
+        const yInput = document.getElementById('coordY');
+        const widthInput = document.getElementById('coordWidth');
+        const heightInput = document.getElementById('coordHeight');
+        if (xInput) xInput.value = 0;
+        if (yInput) yInput.value = 0;
+        if (widthInput) widthInput.value = 0;
+        if (heightInput) heightInput.value = 0;
+        
+        // Clear current file path
+        currentFilePath = '';
+        currentServerVideoPath = '';
+        folderImages = [];
+        currentFolderIndex = 0;
+        
+        // Clear Export/Save data
+        exportData = [];
+        recordingSessionId = null;
+        folderResults = [];
+        lastVideoUrl = null;
+        
+        // Clear Filtering State
+        currentProcessedImage = null;
+        currentOriginalImageUrl = null;
+        selectedDetectionIndex = -1;
+        currentDetections = [];
+    }
+
+    // Camera Logic
+    cameraBtn.addEventListener('click', async () => {
+        resetUI();
+        try {
+            mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            sourceVideo.srcObject = mediaStream;
+            sourceVideo.play();
+            
+            // Toggle UI
+            if(emptyState) emptyState.style.display = 'none';
+            previewImage.style.display = 'none';
+            sourceVideo.style.display = 'none'; // Keep hidden
+            previewCanvas.style.display = 'block'; // Show canvas
+            
+            // Set canvas size when metadata loaded
+            sourceVideo.onloadedmetadata = () => {
+                const MAX_WIDTH = 640;
+                let w = sourceVideo.videoWidth;
+                let h = sourceVideo.videoHeight;
+                if (w > MAX_WIDTH) {
+                    h = Math.round(h * (MAX_WIDTH / w));
+                    w = MAX_WIDTH;
+                }
+                previewCanvas.width = w;
+                previewCanvas.height = h;
+                
+                // For camera, we start drawing immediately even before processing
+                function drawPreview() {
+                    // Only draw if NOT processing. When processing, the interval loop handles drawing for sync.
+                    if (currentMode === 'camera' && !sourceVideo.paused && !sourceVideo.ended && !isProcessing) {
+                        previewCtx.drawImage(sourceVideo, 0, 0, previewCanvas.width, previewCanvas.height);
+                        requestAnimationFrame(drawPreview);
+                    } else if (currentMode === 'camera' && !sourceVideo.paused && !sourceVideo.ended && isProcessing) {
+                        // Keep the loop alive to resume later, but don't draw
+                        requestAnimationFrame(drawPreview);
+                    }
+                }
+                drawPreview();
+            };
+            
+            resultContainer.style.display = 'flex'; // Show result container side-by-side
+            resultContainer.classList.add('d-flex');
+            
+            currentMode = 'camera';
+            processBtn.disabled = false;
+        } catch (err) {
+            console.error("Error accessing camera:", err);
+            alert("无法访问摄像头，请确保已授予权限。");
+        }
+    });
+
+    imageInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        resetUI();
+        
+        // Show image preview
+        if(emptyState) emptyState.style.display = 'none';
+        previewImage.style.display = 'block';
+        previewImage.src = URL.createObjectURL(file);
+        
+        // Show result container (placeholder)
+        resultContainer.style.display = 'flex';
+        
+        // 存储文件路径
+        currentFilePath = file.name;
+        currentMode = 'image';
+        
+        // Upload image immediately for 'image' mode (preserving original logic)
+        await uploadImage(file);
+        processBtn.disabled = false;
+    });
+    
+    videoInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        resetUI();
+        
+        const support = sourceVideo.canPlayType('video/mp4');
+        if (!support) {
+            alert('浏览器不支持当前 MP4 播放，请使用 H.264/AAC 编码的 MP4。');
+            return;
+        }
+        
+        if (emptyState) emptyState.style.display = 'none';
+        previewImage.style.display = 'none';
+        sourceVideo.style.display = 'none'; // Keep hidden
+        previewCanvas.style.display = 'block'; // Show canvas
+        
+        sourceVideo.src = URL.createObjectURL(file);
+        sourceVideo.loop = false;
+        sourceVideo.currentTime = 0; // Reset time
+        sourceVideo.load();
+        
+        // Draw initial frame
+        const drawCover = () => {
+            const MAX_WIDTH = 640;
+            let w = sourceVideo.videoWidth;
+            let h = sourceVideo.videoHeight;
+            
+            if (w > MAX_WIDTH) {
+                h = Math.round(h * (MAX_WIDTH / w));
+                w = MAX_WIDTH;
+            }
+            
+            previewCanvas.width = w;
+            previewCanvas.height = h;
+            previewCtx.drawImage(sourceVideo, 0, 0, w, h);
+        };
+
+        // Use 'seeked' to ensure we have the frame at time 0
+        sourceVideo.addEventListener('seeked', drawCover, { once: true });
+        // Also listen to loadeddata as fallback if seek doesn't fire (sometimes happens on initial load)
+        sourceVideo.addEventListener('loadeddata', () => {
+             // Force seek to 0 to trigger seeked or update frame
+             sourceVideo.currentTime = 0; 
+        }, { once: true });
+        
+        resultContainer.style.display = 'flex'; // Show result container
+        resultContainer.classList.add('d-flex'); // Ensure flex class is added
+        
+        // Hide pause until playback starts
+        pauseBtn.style.display = 'none';
+        
+        currentMode = 'video';
+        currentFilePath = file.name;
+        
+        // Upload video for processing
+        await uploadVideo(file);
+    });
+    
+    folderInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+        if (files.length === 0) {
+            alert('所选文件夹中没有图片文件');
+            return;
+        }
+        
+        resetUI();
+        
+        folderImages = files;
+        currentFolderIndex = 0;
+        currentMode = 'folder';
+        
+        // Load first image
+        const file = folderImages[0];
+        
+        // Show image preview
+        if(emptyState) emptyState.style.display = 'none';
+        previewImage.style.display = 'block';
+        previewImage.src = URL.createObjectURL(file);
+        
+        currentFilePath = file.name;
+        previewImage.src = URL.createObjectURL(file);
+        currentFilePath = file.name; // Keep for reference, but upload happens in loop
+        
+        alert(`已加载 ${files.length} 张图片。点击“开始识别”进行批量检测。`);
+        processBtn.disabled = false;
+        
+        // Pre-show result container with empty image
+        resultContainer.style.display = 'flex';
+    });
+
+    async function uploadImage(file) {
+        showLoading(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('/upload/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) throw new Error(data.message || '上传失败');
+            
+            // Store the server URL for detection
+            previewImage.dataset.serverUrl = data.image_url;
+            
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert(`上传失败: ${error.message}`);
+        } finally {
+            showLoading(false);
+            imageInput.value = ''; // Reset input
+        }
+    }
+
+    // Model Selection Logic
+    const modelSelectBtn = document.getElementById('modelSelectBtn');
+    const modelInput = document.getElementById('modelInput');
+    
+    if (modelSelectBtn && modelInput) {
+        modelSelectBtn.addEventListener('click', () => {
+            modelInput.click();
+        });
+        
+        modelInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // Confirm upload
+            if (!confirm(`确定要加载模型文件 "${file.name}" 吗？`)) {
+                modelInput.value = '';
+                return;
+            }
+            
+            showLoading(true);
+            const formData = new FormData();
+            formData.append('model_file', file);
+            
+            try {
+                const response = await fetch('/upload_model/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.message || '模型加载失败');
+                
+                alert(`模型 "${file.name}" 加载成功！`);
+                
+            } catch (error) {
+                console.error('Model upload error:', error);
+                alert(`模型加载失败: ${error.message}`);
+            } finally {
+                showLoading(false);
+                modelInput.value = ''; // Reset input
+            }
+        });
+    }
+
+    // Handle Detection
+    processBtn.addEventListener('click', async () => {
+        if (currentMode === 'image') {
+            await processSingleImage();
+        } else if (currentMode === 'folder') {
+            startFolderProcessing();
+        } else if (currentMode === 'video' || currentMode === 'camera') {
+            if (currentMode === 'camera') {
+                 if (sourceVideo.paused) {
+                     try {
+                        await sourceVideo.play();
+                     } catch(e) { console.error(e); }
+                 }
+                 startVideoProcessing();
+            } else {
+                 // Video mode: Manual start
+                 startVideoProcessing();
+            }
+            processBtn.style.display = 'none';
+            if (currentMode !== 'camera') {
+                pauseBtn.style.display = 'inline-block';
+                pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停播放';
+            }
+        }
+    });
+    
+    stopBtn.addEventListener('click', () => {
+        // 立即获取当前播放时长，确保在重置前拿到正确值
+        const currentDuration = sourceVideo ? sourceVideo.currentTime : 0;
+        console.log("Stop button clicked. Captured duration:", currentDuration);
+        
+        stopVideoProcessing('stop', currentDuration);
+        isFolderProcessing = false; // Stop folder processing
+        
+        // Reset video logic
+        sourceVideo.pause();
+        sourceVideo.currentTime = 0;
+        
+        // Reset buttons
+        stopBtn.style.display = 'none';
+        pauseBtn.style.display = 'none';
+        processBtn.style.display = 'inline-block';
+        
+        // If folder mode, apply category filter to current result
+        if (currentMode === 'folder') {
+            applyCategoryFilterToCurrentResult();
+        }
+    });
+
+    pauseBtn.addEventListener('click', async () => {
+        if (currentMode === 'folder') {
+             if (isFolderProcessing) {
+                 // Pause
+                 isFolderProcessing = false;
+                 pauseBtn.innerHTML = '<i class="fas fa-play-circle me-2"></i>继续识别';
+                 // Redraw with category filter when paused
+                 applyCategoryFilterToCurrentResult();
+             } else {
+                 // Resume
+                 startFolderProcessing();
+                 pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停识别';
+             }
+        } else {
+            if (currentMode === 'camera') {
+                 if (sourceVideo.paused) {
+                     try {
+                        await sourceVideo.play();
+                        startVideoProcessing();
+                        pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停播放';
+                     } catch(e) { console.error(e); }
+                 } else {
+                     sourceVideo.pause();
+                     stopVideoProcessing('pause');
+                     pauseBtn.innerHTML = '<i class="fas fa-play-circle me-2"></i>继续播放';
+                 }
+            } else {
+                // Video mode: Toggle processing flag
+                if (isProcessing) {
+                    isProcessing = false; // Stops loop
+                    sourceVideo.pause(); // Pause the hidden video
+                    pauseBtn.innerHTML = '<i class="fas fa-play-circle me-2"></i>继续播放';
+                } else {
+                    startVideoProcessing(); // Resumes loop
+                    pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停播放';
+                }
+            }
+        }
+    });
+
+    // Auto-start processing when video plays, stop when paused
+    sourceVideo.addEventListener('play', () => {
+        if (currentMode === 'camera') {
+            startVideoProcessing();
+            // Sync buttons
+            processBtn.style.display = 'none';
+            // pauseBtn.style.display = 'inline-block'; // Disabled for camera
+            // pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停播放';
+        }
+    });
+    
+    sourceVideo.addEventListener('loadedmetadata', () => {
+        if (currentMode === 'video') {
+            processBtn.disabled = false;
+        }
+    });
+    
+    sourceVideo.addEventListener('error', () => {
+        // alert('视频无法播放：可能编码不兼容或文件损坏。');
+        // Only disable if we are in video mode and it's a genuine error (not just clearing src)
+        if (currentMode === 'video' && sourceVideo.src && sourceVideo.src !== window.location.href) {
+            processBtn.disabled = true;
+        }
+    });
+
+    sourceVideo.addEventListener('pause', () => {
+         if (currentMode === 'camera') {
+            stopVideoProcessing('pause');
+             // Sync buttons - keep pauseBtn visible but change text
+            // pauseBtn.innerHTML = '<i class="fas fa-play-circle me-2"></i>继续播放';
+         }
+    });
+
+    sourceVideo.addEventListener('ended', async () => {
+        if (currentMode === 'camera') {
+            await stopVideoProcessing('ended');
+            processBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            alert('视频播放完成，已停止识别');
+        }
+    });
+
+    async function startFolderProcessing() {
+        if (isFolderProcessing) return;
+        isFolderProcessing = true;
+        
+        // Update Buttons
+        processBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        pauseBtn.innerHTML = '<i class="fas fa-pause-circle me-2"></i>暂停识别';
+        // stopBtn.style.display = 'inline-block'; // Keeping consistent with video mode
+        
+        while (isFolderProcessing && currentFolderIndex < folderImages.length) {
+            const file = folderImages[currentFolderIndex];
+            currentFilePath = file.name;
+            
+            // Show current image
+            previewImage.src = URL.createObjectURL(file);
+            
+            try {
+                // We need to upload it first to get a URL for the backend to process
+                // Or modify backend to accept base64. Existing logic uses uploadImage.
+                // We'll reuse uploadImage + sendDetectionRequest pattern from processSingleImage
+                
+                // Note: uploadImage sets previewImage.dataset.serverUrl
+                await uploadImage(file); 
+                
+                const imageUrl = previewImage.dataset.serverUrl;
+                if (imageUrl) {
+                    const data = await sendDetectionRequest(imageUrl);
+                    displayResult(data);
+                }
+                
+            } catch (error) {
+                console.error(`Error processing file ${file.name}:`, error);
+                // Continue to next even if error
+            }
+            
+            // Wait a bit to let user see result
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            if (!isFolderProcessing) break; // Check again after await
+            
+            currentFolderIndex++;
+        }
+        
+        if (currentFolderIndex >= folderImages.length) {
+            isFolderProcessing = false;
+            alert("文件夹批量识别完成！");
+            pauseBtn.style.display = 'none';
+            processBtn.style.display = 'inline-block';
+            processBtn.innerHTML = '<i class="fas fa-redo me-2"></i>重新识别';
+            currentFolderIndex = 0; // Reset for next run
+            // Redraw with category filter after completion
+            applyCategoryFilterToCurrentResult();
+        }
+    }
+
+    async function processSingleImage() {
+        // Ensure video processing is stopped
+        stopVideoProcessing('stop');
+
+        const imageUrl = previewImage.dataset.serverUrl || previewImage.src;
+        if (!imageUrl) {
+            alert('请先选择图片');
+            return;
+        }
+        
+        showLoading(true);
+        processBtn.disabled = true;
+        
+        try {
+            const data = await sendDetectionRequest(imageUrl);
+            displayResult(data);
+        } catch (error) {
+            console.error('Detection error:', error);
+            alert(`识别失败: ${error.message}`);
+        } finally {
+            showLoading(false);
+            processBtn.disabled = false;
+        }
+    }
+    
+    // Manage Recording Session
+    async function manageRecording(action, skipSave = false, width = null, height = null, fps = null, deleteTempFile = true, duration = null) {
+        try {
+            const body = { action: action, skip_save: skipSave, delete_temp_file: deleteTempFile };
+            if (action === 'start') {
+                body.width = width || 640; 
+                body.height = height || 480;
+                body.fps = fps || 20; // Default to 20 if not provided
+                if (!width && sourceVideo.videoWidth) {
+                    body.width = sourceVideo.videoWidth;
+                    body.height = sourceVideo.videoHeight;
+                }
+            } else if (action === 'stop') {
+                if (!recordingSessionId) return null;
+                body.session_id = recordingSessionId;
+                if (duration !== null) {
+                    body.duration = duration;
+                }
+            }
+
+            const response = await fetch('/manage_video_recording/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (!response.ok) {
+                let errorMessage = `Request failed with status ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) errorMessage = errorData.message;
+                } catch (e) {
+                    // ignore
+                }
+                throw new Error(errorMessage);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Recording error:', error);
+            return null;
+        }
+    }
+
+    function exportResult() {
+        if (typeof XLSX === 'undefined') {
+            alert('导出功能组件未能加载，请检查网络连接');
+            return;
+        }
+        
+        if (exportData.length === 0) {
+            alert('暂无识别结果可导出');
+            return;
+        }
+
+        try {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(wb, ws, "识别结果");
+            XLSX.writeFile(wb, "detection_results.xlsx");
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('导出失败: ' + error.message);
+        }
+    }
+
+    async function saveResult() {
+        if (typeof saveAs === 'undefined') {
+            alert('保存功能组件未能加载，请检查网络连接');
+            return;
+        }
+
+        try {
+            if (currentMode === 'image') {
+                const resultSrc = resultImage.src;
+                if (!resultSrc || resultSrc === window.location.href || resultSrc.includes('placeholder')) {
+                    alert('暂无结果可保存');
+                    return;
+                }
+                saveAs(resultSrc, `detection_result_${Date.now()}.jpg`);
+            } 
+            else if (currentMode === 'video' || currentMode === 'camera') {
+                // If still recording, stop first (which handles saving history + modal)
+                if (recordingSessionId) {
+                    if (confirm("检测尚未结束，是否停止并保存？")) {
+                        await stopVideoProcessing('stop');
+                    } else {
+                        return;
+                    }
+                }
+                
+                // If already stopped/saved previously
+                if (lastVideoUrl) {
+                    saveAs(lastVideoUrl, `video_result_${Date.now()}.mp4`);
+                } else {
+                    alert('暂无视频结果可保存（请先进行识别）');
+                }
+            } 
+            else if (currentMode === 'folder') {
+                if (typeof JSZip === 'undefined') {
+                     alert('打包组件未能加载，请检查网络连接');
+                     return;
+                }
+                
+                if (folderResults.length === 0) {
+                    alert('暂无文件夹识别结果');
+                    return;
+                }
+                
+                const zip = new JSZip();
+                const folder = zip.folder("detection_results");
+                
+                showLoading(true);
+                try {
+                    const promises = folderResults.map(async (item, index) => {
+                        const response = await fetch(item.url);
+                        const blob = await response.blob();
+                        const filename = item.name ? `result_${item.name}` : `result_${index}.jpg`;
+                        folder.file(filename, blob);
+                    });
+                    
+                    await Promise.all(promises);
+                    
+                    const content = await zip.generateAsync({type:"blob"});
+                    saveAs(content, "folder_results.zip");
+                } catch (error) {
+                    console.error("Error zipping files:", error);
+                    alert("打包下载失败: " + error.message);
+                } finally {
+                    showLoading(false);
+                }
+            }
+        } catch (error) {
+            console.error('Save result error:', error);
+            alert('保存失败: ' + error.message);
+        }
+    }
+
+    async function startVideoProcessing() {
+        if (isProcessing) return;
+        if (currentMode === 'image') return;
+
+        // Force result container visibility
+        resultContainer.style.display = 'flex';
+        resultContainer.classList.add('d-flex');
+        resultImage.style.display = 'block';
+        if(resultVideo) resultVideo.style.display = 'none';
+
+        // Start recording session if not exists
+        if (!recordingSessionId) {
+            // Calculate dimensions to match processFrame logic (max 640 width)
+            // This ensures the recorded video has the same dimensions as the frames being sent/processed.
+            const MAX_WIDTH = 640;
+            let w = sourceVideo.videoWidth;
+            let h = sourceVideo.videoHeight;
+            
+            if (w > MAX_WIDTH) {
+                h = Math.round(h * (MAX_WIDTH / w));
+                w = MAX_WIDTH;
+            }
+
+            // Determine FPS if possible, for video mode this is important for correct playback speed
+            let fps = 20; // default
+            // In video mode, we can try to get it, but HTMLVideoElement doesn't expose it directly.
+            // However, user requested "按照原视频的fps".
+            // Since we don't have metadata, we can't be 100% sure. 
+            // But we can try to guess or use a standard 30 if in video mode.
+            // Or if we can, rely on user input/metadata. 
+            // Without ffprobe/server-side info, client-side FPS detection is tricky.
+            // Let's assume 30 for video files as it's more common than 20.
+            if (currentMode === 'video') {
+                fps = 30; // Common standard, better than 20 for smooth playback
+                // Ideally we would get this from the file metadata on upload but we don't have that info here easily.
+            }
+
+            const data = await manageRecording('start', false, w, h, fps);
+            if (data && data.session_id) {
+                recordingSessionId = data.session_id;
+                
+                // Initialize timing variables for camera mode
+                if (currentMode === 'camera') {
+                    recordingStartTime = Date.now();
+                    recordingPauseStartTime = 0;
+                    totalPausedTime = 0;
+                }
+            }
+        } else {
+            // Resuming existing session
+            if (currentMode === 'camera' && recordingPauseStartTime > 0) {
+                totalPausedTime += (Date.now() - recordingPauseStartTime);
+                recordingPauseStartTime = 0;
+            }
+        }
+        
+        isProcessing = true;
+        stopBtn.style.display = 'inline-block'; // Show stop button
+        
+        // Create a canvas for frame capture
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Camera Mode: Use Interval (Stream sampling)
+        if (currentMode === 'camera') {
+            let isRequestPending = false;
+            processingInterval = setInterval(async () => {
+                if (!isProcessing) return;
+                if (isRequestPending) return;
+                
+                if (sourceVideo.readyState === sourceVideo.HAVE_ENOUGH_DATA) {
+                    await processFrame(sourceVideo, canvas, ctx);
+                }
+            }, 200);
+            
+            // Ensure camera is playing
+            if (sourceVideo.paused) sourceVideo.play().catch(e => console.error(e));
+        } 
+        // Video Mode: Manual Stepping
+        else if (currentMode === 'video') {
+            // 如果视频已经播放结束，重置到开始
+            if (sourceVideo.ended || sourceVideo.currentTime >= sourceVideo.duration) {
+                sourceVideo.currentTime = 0;
+            }
+
+            // 正常播放视频，实现自然播放速度
+            sourceVideo.play().catch(e => console.error("Play failed:", e));
+            
+            const processLoop = async () => {
+                if (!isProcessing) return;
+
+                // 检查视频是否结束
+                if (sourceVideo.ended) {
+                    await stopVideoProcessing('ended');
+                    alert('视频播放完成，已停止识别');
+                    processBtn.style.display = 'inline-block';
+                    pauseBtn.style.display = 'none';
+                    return;
+                }
+                
+                // 处理当前帧 (采样检测)
+                // 使用 await 确保不会堆积请求，实际 FPS 取决于处理速度 (Inference Time + Network)
+                if (sourceVideo.readyState >= sourceVideo.HAVE_CURRENT_DATA) {
+                    await processFrame(sourceVideo, canvas, ctx);
+                }
+                
+                // 继续循环
+                if (isProcessing) {
+                    // 使用 requestAnimationFrame 使得循环紧跟渲染节奏，但受限于 await processFrame 的耗时
+                    requestAnimationFrame(processLoop);
+                }
+            };
+            
+            processLoop();
+        }
+        
+        // Helper to process a single frame
+        async function processFrame(video, canvas, ctx) {
+            const MAX_WIDTH = 640;
+            let w = video.videoWidth;
+            let h = video.videoHeight;
+            
+            if (w > MAX_WIDTH) {
+                h = Math.round(h * (MAX_WIDTH / w));
+                w = MAX_WIDTH;
+            }
+            
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(video, 0, 0, w, h);
+            
+            const frameData = canvas.toDataURL('image/jpeg', 0.6);
+            
+            try {
+                // Pass video timestamp if available
+                const timestamp = video.currentTime;
+                const data = await sendDetectionRequest(frameData, timestamp);
+                
+                // Attach timestamp to data for displayResult
+                data.video_timestamp = timestamp;
+                
+                if ((currentMode === 'video' || currentMode === 'camera') && previewCanvas) {
+                     previewCanvas.width = w;
+                     previewCanvas.height = h;
+                     previewCtx.drawImage(canvas, 0, 0, w, h);
+                }
+
+                if (data.processed_image) {
+                    resultImage.src = data.processed_image;
+                }
+                displayResult(data); 
+            } catch (error) {
+                console.warn('Frame detection failed:', error);
+            }
+        }
+    }
+    
+    async function stopVideoProcessing(reason = 'pause', duration = null) {
+        if (reason === 'pause' && currentMode === 'camera') {
+            recordingPauseStartTime = Date.now();
+        }
+
+        // Use passed duration or capture it if not provided (fallback)
+        let finalDuration = (duration !== null && duration !== undefined) ? duration : (sourceVideo ? sourceVideo.currentTime : null);
+        console.log("stopVideoProcessing called. Duration to use:", finalDuration);
+
+        isProcessing = false;
+        if (processingInterval) {
+            clearInterval(processingInterval);
+            processingInterval = null;
+        }
+        
+        // Reset buttons if stopping
+        if (reason !== 'pause') {
+            stopBtn.style.display = 'none';
+            pauseBtn.style.display = 'none';
+            processBtn.style.display = 'inline-block';
+            
+            // Reset video logic
+            if (sourceVideo) {
+                sourceVideo.pause();
+                if (currentMode === 'video') {
+                     sourceVideo.currentTime = 0;
+                }
+            }
+        }
+        
+        // Stop backend recording session if exists
+        // Modified: Only stop session if NOT pausing. 
+        // Pause means we suspend but keep the session alive (so resume appends to same video).
+        if (recordingSessionId && reason !== 'pause') {
+            // Show Global Progress Overlay
+            const overlay = document.getElementById('saveProgressOverlay');
+            if(overlay) overlay.style.display = 'flex';
+            
+            try {
+                const conf = confidenceSlider ? confidenceSlider.value : 0.5;
+                const iou = iouSlider ? iouSlider.value : 0.5;
+                const categoryFilter = document.getElementById('categoryFilter');
+                const selectedCategory = categoryFilter ? categoryFilter.value : '';
+
+                if (currentMode === 'video' && currentServerVideoPath) {
+                    // For video mode: use fast_mode to stitch frames from the current session
+                    // This avoids re-running detection on the original video
+                    // We call manageRecording with skipSave=true (to skip default record saving) 
+                    // BUT deleteTempFile=false (to KEEP the video file so process_video_file can use it)
+                    await manageRecording('stop', true, null, null, null, false); 
+                    
+                    const resp = await fetch('/process_video_file/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            video_path: currentServerVideoPath, // keep this for reference/naming
+                            session_id: recordingSessionId,     // Vital for fast_mode
+                            fast_mode: true,                    // Enable fast mode
+                            conf: conf,
+                            iou: iou,
+                            save_history: true,
+                            filtered_categories: selectedCategory ? [selectedCategory] : null,
+                            duration: finalDuration // Pass captured duration
+                        })
+                    });
+                    if (!resp.ok) {
+                        const err = await resp.json().catch(() => ({}));
+                        throw new Error(err.message || '处理视频失败');
+                    }
+                    const outData = await resp.json();
+                    if (outData && outData.video_url) {
+                        lastVideoUrl = outData.video_url;
+                    }
+                } else {
+                    // Calculate precise duration for camera
+                    if (currentMode === 'camera' && recordingStartTime > 0) {
+                        // Calculate elapsed time in seconds
+                        // Note: Date.now() is in ms
+                        finalDuration = (Date.now() - recordingStartTime - totalPausedTime) / 1000.0;
+                        console.log("Camera recording duration:", finalDuration);
+                    }
+
+                    // For camera or other modes: use recorded session video as result
+                    // Pass duration to backend so it can calculate correct FPS
+                    const data = await manageRecording('stop', false, null, null, null, true, finalDuration);
+                    if (data && data.video_url) {
+                        lastVideoUrl = data.video_url;
+                    }
+                }
+                
+                // Refresh history to show new record immediately
+                refreshHistory();
+            } catch (error) {
+                console.error("Stop processing error:", error);
+                alert("保存记录失败: " + error.message);
+            } finally {
+                if(overlay) overlay.style.display = 'none';
+                recordingSessionId = null;
+                
+                // Reset timing variables
+                recordingStartTime = 0;
+                recordingPauseStartTime = 0;
+                totalPausedTime = 0;
+            }
+        }
+    }
+
+    async function sendDetectionRequest(imageUrl, timestamp = null) {
+        const conf = confidenceSlider ? confidenceSlider.value : 0.5;
+        const iou = iouSlider ? iouSlider.value : 0.5;
+        const categoryFilter = document.getElementById('categoryFilter');
+        const selectedCategory = categoryFilter ? categoryFilter.value : '';
+        
+        const response = await fetch('/detect/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                image_url: imageUrl,
+                conf: conf,
+                iou: iou,
+                filtered_categories: selectedCategory ? [selectedCategory] : null,
+                recording_session_id: recordingSessionId, // Pass session ID
+                timestamp: timestamp // Pass video timestamp
+            })
+        });
+        
+        if (!response.ok) {
+            // Try to parse error message
+            let errorMessage = '服务器内部错误';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+            } catch (e) {
+                const text = await response.text();
+                console.error("Non-JSON error response:", text);
+            }
+            throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        
+        // Inject original image if it was a base64 frame (video/camera mode)
+        // so displayResult can use it for filtering
+        if (imageUrl && imageUrl.startsWith('data:image')) {
+            data.original_image_data = imageUrl;
+        }
+        
+        return data;
+    }
+
+    function displayResult(data) {
+        // 暂时隐藏识别结果区
+        resultSection.style.display = 'none';
+        
+        // Show result image in the right container for ALL modes (including image)
+        resultContainer.style.display = 'flex';
+        
+        // 保存当前检测结果
+        currentDetections = data.detections || [];
+        
+        // Save images for filtering
+        currentProcessedImage = data.processed_image || data.image_url || previewImage.src;
+        // Try to get original image URL. If data.image_url is backend path, use it. 
+        // If local preview is blob, use it.
+        // If video/camera mode, use the injected base64 data.
+        currentOriginalImageUrl = data.original_image_data || data.image_url || previewImage.src;
+        
+        // Reset selection
+        selectedDetectionIndex = -1;
+        
+        // 直接使用后端返回的标注图，不进行前端绘制
+        resultImage.src = currentProcessedImage;
+        
+        // Only refresh history and scroll in image mode
+        if (currentMode === 'image') {
+            refreshHistory();
+        }
+        
+        // Update stats directly
+        updateStats(data);
+        
+        // Update detection list
+        populateDetectionList(data);
+        
+        // Voice Alert
+        const voiceAlert = document.getElementById('voiceAlert');
+        if (voiceAlert && voiceAlert.checked && data.detections && data.detections.length > 0) {
+            // Play sound, catch error if autoplay blocked
+            alarmAudio.currentTime = 0; // Rewind
+            alarmAudio.play().catch(e => console.log("Audio play failed:", e));
+        }
+
+        // Accumulate data for export
+        // Prioritize video timestamp if available
+        let timeStr;
+        if (data.video_timestamp !== undefined && data.video_timestamp !== null) {
+            // Format to seconds with 2 decimal places
+            timeStr = parseFloat(data.video_timestamp).toFixed(2);
+        } else {
+             const timeInSeconds = (Date.now() / 1000).toFixed(2);
+             timeStr = timeInSeconds;
+        }
+
+        if (data.detections && data.detections.length > 0) {
+            data.detections.forEach((det) => {
+                 exportData.push({
+                     "序号": exportData.length + 1,
+                     "文件路径": currentMode === 'video' || currentMode === 'camera' ? '实时画面' : currentFilePath,
+                     "类别": det.class,
+                     "置信度": det.confidence.toFixed(2),
+                     "x1": det.bbox.xmin,
+                     "y1": det.bbox.ymin,
+                     "x2": det.bbox.xmax,
+                     "y2": det.bbox.ymax,
+                     "时间": timeStr
+                 });
+            });
+        }
+        
+        // Accumulate Folder Results
+        if (currentMode === 'folder') {
+            const resultUrl = data.processed_image || data.image_url;
+            if (resultUrl) {
+                folderResults.push({
+                    name: currentFilePath,
+                    url: resultUrl
+                });
+            }
+        }
+    }
+    
+    // 绘制检测结果的边界框和文字
+    function drawDetectionsOnCanvas(ctx, detections, imageWidth, imageHeight) {
+        detections.forEach(detection => {
+            const { class: className, confidence, bbox, cls_id } = detection;
+            const { xmin, ymin, xmax, ymax } = bbox;
+            
+            // 计算边界框坐标
+            const x = xmin;
+            const y = ymin;
+            const width = xmax - xmin;
+            const height = ymax - ymin;
+            
+            // 获取颜色
+            const color = getColor(cls_id, className);
+            
+            // 绘制边界框
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(x, y, width, height);
+            
+            // 绘制文字背景
+            const text = `${className} ${(confidence * 100).toFixed(1)}%`;
+            ctx.font = '16px Arial';
+            ctx.fillStyle = color;
+            const textWidth = ctx.measureText(text).width + 8;
+            const textHeight = 22;
+            ctx.fillRect(x, y - textHeight, textWidth, textHeight);
+            
+            // 绘制文字
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(text, x + 4, y - 6);
+        });
+    }
+
+    function populateDetectionList(data) {
+        const tableBody = document.getElementById('detectionTableBody');
+        
+        if (!tableBody) return;
+        
+        // 清空表格
+        tableBody.innerHTML = '';
+        
+        if (!data.detections || data.detections.length === 0) {
+            // 没有检测结果
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted">暂无识别目标</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // 填充检测结果
+        data.detections.forEach((detection, index) => {
+            // 从后端返回的数据结构中提取正确的字段
+            const { class: className, confidence, bbox } = detection;
+            const { xmin: x1, ymin: y1, xmax: x2, ymax: y2 } = bbox;
+            
+            // 创建表格行
+            const row = document.createElement('tr');
+            row.className = 'clickable-row cursor-pointer';
+            row.dataset.index = index;
+            
+            // 计算坐标字符串
+            const coordinates = `(${x1}, ${y1}) - (${x2}, ${y2})`;
+            
+            // 填充表格单元格
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td class="text-truncate" style="max-width: 200px;">${currentFilePath || '未命名文件'}</td>
+                <td>${className}</td>
+                <td>${(confidence * 100).toFixed(1)}%</td>
+                <td>${coordinates}</td>
+            `;
+            
+            // 添加点击事件
+            row.addEventListener('click', () => {
+                toggleDetectionFilter(index);
+            });
+            
+            // 添加到表格
+            tableBody.appendChild(row);
+        });
+    }
+    
+    // Toggle Detection Filter
+    async function toggleDetectionFilter(index) {
+        const rows = document.querySelectorAll('#detectionTableBody tr');
+        
+        if (selectedDetectionIndex === index) {
+            // Deselect: Show all
+            selectedDetectionIndex = -1;
+            resultImage.src = currentProcessedImage;
+            rows.forEach(r => r.classList.remove('active-row'));
+        } else {
+            // Select: Show single
+            selectedDetectionIndex = index;
+            rows.forEach(r => r.classList.remove('active-row'));
+            // rows[index] might not work if table was rebuilt, but here index corresponds to children order
+            // assuming tableBody structure is simple (row 0 is data 0)
+            if (rows[index]) rows[index].classList.add('active-row');
+            
+            const detection = currentDetections[index];
+            if (detection) {
+                await drawSingleDetection(detection);
+                showDetectionDetails(detection);
+            }
+        }
+    }
+
+    // Draw single detection on original image
+    async function drawSingleDetection(detection) {
+        if (!currentOriginalImageUrl) return;
+
+        // Load original image
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = currentOriginalImageUrl;
+        
+        try {
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw original image
+            ctx.drawImage(img, 0, 0);
+            
+            // Draw specific detection
+            // We use the existing helper but pass only one detection
+            drawDetectionsOnCanvas(ctx, [detection], img.width, img.height);
+            
+            // Update result image
+            resultImage.src = canvas.toDataURL();
+            
+        } catch (e) {
+            console.error("Error drawing single detection:", e);
+        }
+    }
+    
+    // Apply category filter by redrawing current image with filtered boxes
+    async function applyCategoryFilterToCurrentResult() {
+        const categoryFilter = document.getElementById('categoryFilter');
+        const selectedCategory = categoryFilter ? categoryFilter.value : '';
+        
+        if (!currentOriginalImageUrl) return;
+        
+        // If no category selected, show backend processed image
+        if (!selectedCategory) {
+            if (currentProcessedImage) {
+                resultImage.src = currentProcessedImage;
+            }
+            return;
+        }
+        
+        // Filter detections by selected category
+        const filtered = (currentDetections || []).filter(d => d.class === selectedCategory);
+        
+        // If nothing matches, show original image without boxes
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.src = currentOriginalImageUrl;
+        
+        try {
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw original image
+            ctx.drawImage(img, 0, 0);
+            
+            if (filtered.length > 0) {
+                drawDetectionsOnCanvas(ctx, filtered, img.width, img.height);
+            }
+            
+            // Update result image
+            resultImage.src = canvas.toDataURL();
+        } catch (e) {
+            console.error("Error applying category filter:", e);
+        }
+    }
+    
+    // 显示检测目标详细信息
+    function showDetectionDetails(detection) {
+        // 从后端返回的数据结构中提取正确的字段
+        const { class: className, confidence, bbox } = detection;
+        const { xmin: x1, ymin: y1, xmax: x2, ymax: y2 } = bbox;
+        
+        // 更新右侧信息区
+        
+        // 更新检测类别
+        const classDisplay = document.getElementById('detectionClass');
+        if (classDisplay) {
+            classDisplay.value = className;
+        }
+        
+        // 更新置信度
+        const confidenceDisplay = document.getElementById('confidenceDisplay');
+        if (confidenceDisplay) {
+            confidenceDisplay.value = (confidence * 100).toFixed(2) + '%';
+        }
+        
+        // 更新坐标位置
+        const xInput = document.getElementById('coordX');
+        const yInput = document.getElementById('coordY');
+        const widthInput = document.getElementById('coordWidth');
+        const heightInput = document.getElementById('coordHeight');
+        
+        if (xInput) xInput.value = x1;
+        if (yInput) yInput.value = y1;
+        if (widthInput) widthInput.value = x2 - x1;
+        if (heightInput) heightInput.value = y2 - y1;
+        
+        // 更新类别统计区域的显示
+        const categoryStatsContainer = document.getElementById('categoryStatsContainer');
+        if (categoryStatsContainer) {
+            // 清除现有内容
+            categoryStatsContainer.innerHTML = '';
+            
+            // 创建单个检测结果的统计
+            const isPositive = className.includes('健康') || className.includes('空位');
+            const colorClass = isPositive ? 'text-success' : 'text-danger';
+            
+            const itemHtml = `
+                <div class="mb-2 p-2 bg-secondary bg-opacity-10 rounded">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="category-label small">${className}:</span>
+                        <span class="fw-bold ${colorClass}">1</span>
+                    </div>
+                </div>
+            `;
+            
+            categoryStatsContainer.innerHTML = itemHtml;
+        }
+    }
+
+    function updateStats(data) {
+        // Update Counts
+        if (data.detections) {
+            const count = data.detections.length;
+            const totalTargets = document.getElementById('totalTargets');
+            const detectionCount = document.getElementById('detectionCount');
+            
+            if(totalTargets) totalTargets.textContent = count;
+            if(detectionCount) detectionCount.textContent = count + "个";
+        }
+
+        // Update Detection Time
+        if (data.inference_time) {
+             const detectionTime = document.getElementById('detectionTime');
+             if(detectionTime) detectionTime.textContent = data.inference_time;
+        }
+        
+        // Update Category Stats
+        const statsContainer = document.getElementById('categoryStatsContainer');
+        if (statsContainer && data.category_counts) {
+            statsContainer.innerHTML = ''; // Clear previous
+            
+            if (Object.keys(data.category_counts).length === 0) {
+                 statsContainer.innerHTML = '<div class="text-center text-muted small py-3">未检测到目标</div>';
+            } else {
+                for (const [name, count] of Object.entries(data.category_counts)) {
+                    const isPositive = name.includes('健康') || name.includes('空位');
+                    const colorClass = isPositive ? 'text-success' : 'text-danger';
+                    
+                    const itemHtml = `
+                        <div class="mb-2 p-2 bg-secondary bg-opacity-10 rounded">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="category-label small">${name}:</span>
+                                <span class="fw-bold ${colorClass}">${count}</span>
+                            </div>
+                        </div>
+                    `;
+                    statsContainer.innerHTML += itemHtml;
+                }
+            }
+        }
+    }
+
+    // Helper: Show/Hide Loading
+    function showLoading(isLoading) {
+        loadingOverlay.style.display = isLoading ? 'flex' : 'none';
+        processBtn.disabled = isLoading;
+    }
+    
+    // Helper: Draw detections with bounding boxes and labels
+    function drawDetections(imageElement, detections) {
+        // Remove any existing canvas
+        const existingCanvas = imageElement.parentElement.querySelector('canvas');
+        if (existingCanvas) {
+            existingCanvas.remove();
+        }
+        
+        // If no detections, nothing to draw
+        if (!detections || detections.length === 0) {
+            return;
+        }
+        
+        // Create canvas element
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match image display size
+        const rect = imageElement.getBoundingClientRect();
+        const containerRect = imageElement.parentElement.getBoundingClientRect();
+        
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        canvas.style.position = 'absolute';
+        canvas.style.top = rect.top - containerRect.top + 'px';
+        canvas.style.left = rect.left - containerRect.left + 'px';
+        canvas.style.pointerEvents = 'none';
+        
+        // Add canvas to image container
+        imageElement.parentElement.appendChild(canvas);
+        
+        // Draw each detection
+        detections.forEach(detection => {
+            // 从后端返回的数据结构中提取正确的字段
+            const { class: className, confidence, bbox, cls_id } = detection;
+            const { xmin: x1, ymin: y1, xmax: x2, ymax: y2 } = bbox;
+            
+            // Calculate relative coordinates based on image dimensions
+            const imageWidth = imageElement.naturalWidth;
+            const imageHeight = imageElement.naturalHeight;
+            
+            const scaleX = rect.width / imageWidth;
+            const scaleY = rect.height / imageHeight;
+            
+            const drawX1 = x1 * scaleX;
+            const drawY1 = y1 * scaleY;
+            const drawX2 = x2 * scaleX;
+            const drawY2 = y2 * scaleY;
+            
+            // Get color for this class
+            const color = getColor(cls_id, className);
+            
+            // Draw bounding box
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(drawX1, drawY1, drawX2 - drawX1, drawY2 - drawY1);
+            
+            // Draw label background
+            const label = `${className} ${(confidence * 100).toFixed(1)}%`;
+            ctx.font = '14px Arial';
+            ctx.fillStyle = color;
+            const labelWidth = ctx.measureText(label).width + 8;
+            const labelHeight = 22;
+            
+            ctx.fillRect(drawX1, drawY1 - labelHeight, labelWidth, labelHeight);
+            
+            // Draw label text
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textBaseline = 'top';
+            ctx.fillText(label, drawX1 + 4, drawY1 - labelHeight + 4);
+        });
+    }
+
+    // Refresh History List
+    async function refreshHistory() {
+        const historyContainer = document.getElementById('historyContainer');
+        const listContainer = historyContainer ? historyContainer.querySelector('.history-list') : null;
+        
+        if (listContainer) {
+             listContainer.innerHTML = `
+                <div class="text-center text-muted mt-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">正在加载历史记录...</p>
+                </div>
+             `;
+        }
+
+        try {
+            const response = await fetch('/get_history_html/');
+            if (response.ok) {
+                const html = await response.text();
+                if (listContainer) {
+                    listContainer.innerHTML = html;
+                } else if (historyContainer) {
+                    historyContainer.innerHTML = html;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to refresh history:', error);
+            if (listContainer) {
+                listContainer.innerHTML = `<div class="text-center text-danger mt-5">加载失败，请重试</div>`;
+            }
+        }
+    }
+
+    // Logout
+    document.getElementById('logoutLink').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if(!confirm('确定要退出登录吗？')) return;
+        
+        try {
+            const response = await fetch('/logout/', {
+                method: 'GET',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                // Fallback if no redirect header
+                window.location.href = '/login/'; 
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = '/login/';
+        }
+    });
+
+    // Avatar Preview
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+                
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+            }
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Profile Update Logic
+    function submitProfileUpdate() {
+        const form = document.getElementById('profileForm');
+        const formData = new FormData(form);
+        const submitBtn = document.getElementById('saveProfileBtn');
+        const originalText = submitBtn.innerHTML;
+        
+        // Basic Validation
+        const password = formData.get('password');
+        const confirm = formData.get('confirm_password');
+        
+        if (password && password !== confirm) {
+            alert('两次输入的密码不一致');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>保存中...';
+        
+        fetch('/update_profile/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('个人信息更新成功');
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+                modal.hide();
+                // If username changed or avatar updated, reload page
+                if (formData.get('username') !== '{{ request.user.username }}' || (formData.get('avatar') && formData.get('avatar').size > 0)) {
+                    location.reload(); 
+                } else {
+                    // Clear password fields
+                    form.querySelector('input[name="password"]').value = '';
+                    form.querySelector('input[name="confirm_password"]').value = '';
+                }
+            } else {
+                alert('更新失败: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('发生错误，请重试');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        });
+    }
+
+    // Initial Load
+    document.addEventListener('DOMContentLoaded', () => {
+        // refreshHistory();
+        loadCategories();
+    });
+    
+    // Load categories from API
+    async function loadCategories() {
+        try {
+            const response = await fetch('/get_categories/');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.status === 'success' && data.categories) {
+                    const categoryFilter = document.getElementById('categoryFilter');
+                    if (categoryFilter) {
+                        // Clear existing options except the first one
+                        const firstOption = categoryFilter.firstElementChild;
+                        categoryFilter.innerHTML = '';
+                        categoryFilter.appendChild(firstOption);
+                        
+                        // Add categories to the select element
+                        data.categories.forEach(category => {
+                            const option = document.createElement('option');
+                            option.value = category;
+                            option.textContent = category;
+                            categoryFilter.appendChild(option);
+                        });
+                        
+                        // Add filter change event listener
+                        categoryFilter.addEventListener('change', applyCategoryFilter);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load categories:', error);
+        }
+    }
+    
+    // Apply category filter
+    async function applyCategoryFilter() {
+        const categoryFilter = document.getElementById('categoryFilter');
+        const selectedCategory = categoryFilter.value;
+        
+        // 图片模式：重新发送请求到后端获取过滤后的结果
+        if (currentMode === 'image' && (previewImage.dataset.serverUrl || previewImage.src)) {
+            // showLoading(true); // Disable loading overlay to prevent original image flicker
+            try {
+                const data = await sendDetectionRequest(previewImage.dataset.serverUrl || previewImage.src);
+                displayResult(data);
+            } catch (error) {
+                console.error('Filter error:', error);
+                alert(`过滤失败: ${error.message}`);
+            } finally {
+                // showLoading(false);
+            }
+        } else if (currentMode === 'video' || currentMode === 'camera') {
+            // 视频和摄像头模式：不需要提示，sendDetectionRequest 会在下一帧自动读取新的过滤条件
+            // 如果暂停中，可以考虑处理当前帧，但为了简单，用户继续播放时自动生效
+            console.log('Filter updated for video/camera mode');
+        } else if (currentMode === 'folder') {
+            // 文件夹模式：在暂停或结束时，直接在当前结果图上重绘过滤后的类别
+            if (!isFolderProcessing) {
+                applyCategoryFilterToCurrentResult();
+            }
+        }
+    }
+    
+    // Count categories in detections
+    function countCategories(detections) {
+        const counts = {};
+        detections.forEach(detection => {
+            const className = detection.class;
+            counts[className] = (counts[className] || 0) + 1;
+        });
+        return counts;
+    }
+
+    // View History Item (Called from history_list.html)
+    function viewHistoryItem(resultPath, id, originalPath) {
+        // Check extension
+        const ext = resultPath.split('.').pop().toLowerCase();
+        const isVideo = ['mp4', 'webm', 'ogg'].includes(ext);
+        
+        const modalImg = document.getElementById('historyModalImage');
+        const modalVideo = document.getElementById('historyModalVideo');
+        const modalTitle = document.querySelector('#historyPreviewModal .modal-title');
+        
+        if (modalTitle) modalTitle.innerHTML = `<i class="fas fa-history me-2"></i>检测记录 #${id}`;
+
+        if (isVideo) {
+            modalImg.style.display = 'none';
+            modalImg.src = '';
+            
+            modalVideo.src = resultPath;
+            modalVideo.style.display = 'block';
+            modalVideo.load();
+        } else {
+            modalVideo.style.display = 'none';
+            modalVideo.pause();
+            modalVideo.src = '';
+            
+            modalImg.src = resultPath;
+            modalImg.style.display = 'block';
+        }
+        
+        // Show Modal
+        const historyModal = new bootstrap.Modal(document.getElementById('historyPreviewModal'));
+        historyModal.show();
+        
+        // Stop video when modal is closed
+        const modalEl = document.getElementById('historyPreviewModal');
+        // Remove existing listeners to prevent accumulation (optional but good practice if not using {once:true} properly)
+        const newModalEl = modalEl.cloneNode(true);
+        // Replacing element to clear listeners is drastic and breaks BS modal instance. 
+        // Better: Just add one-time listener or check if listener exists. 
+        // Actually, simple {once:true} on show is fine, but since we create new Modal instance each time...
+        // Bootstrap 5 recommends getting existing instance.
+        
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            modalVideo.pause();
+            modalVideo.src = '';
+        }, { once: true });
+    }
+</script>
+<!-- Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>修改个人信息</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm" enctype="multipart/form-data">
+                    <div class="mb-4 text-center">
+                        <div class="position-relative d-inline-block">
+                            {% if request.user.avatar %}
+                                <img id="avatarPreview" src="{{ request.user.avatar.url }}" class="rounded-circle shadow" width="100" height="100" style="object-fit: cover; border: 3px solid var(--primary-color, #00ff88);">
+                            {% else %}
+                                <div id="avatarPlaceholder" class="rounded-circle shadow d-flex justify-content-center align-items-center bg-secondary" style="width: 100px; height: 100px; border: 3px solid var(--primary-color, #00ff88);">
+                                    <i class="fas fa-user fa-3x text-white"></i>
+                                </div>
+                                <img id="avatarPreview" src="" class="rounded-circle shadow" width="100" height="100" style="object-fit: cover; border: 3px solid var(--primary-color, #00ff88); display: none;">
+                            {% endif %}
+                            <label for="avatarInput" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm" style="cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-camera fa-sm"></i>
+                            </label>
+                            <input type="file" name="avatar" id="avatarInput" class="d-none" accept="image/*" onchange="previewAvatar(this)">
+                        </div>
+                        <div class="text-white-50 small mt-2">点击图标修改头像</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-light">用户名</label>
+                        <input type="text" name="username" class="form-control" value="{{ request.user.username }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-light">新密码 <span class="text-secondary small">(不修改请留空)</span></label>
+                        <input type="password" name="password" class="form-control" placeholder="输入新密码">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-light">确认新密码</label>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="再次输入新密码">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveProfileBtn" onclick="submitProfileUpdate()">保存修改</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- History Preview Modal -->
+<div class="modal fade" id="historyPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-history me-2"></i>历史记录详情</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 bg-black d-flex justify-content-center align-items-center" style="height: 80vh; overflow: hidden;">
+                <img id="historyModalImage" src="" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain; display: none;">
+                <video id="historyModalVideo" controls style="max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; display: none;"></video>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+/* static/css/animations/tech-anim-3.css - Solar Warmth Animations */
+
+/* Scan Animation - Warm Beam */
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(249, 115, 22, 0.1), transparent);
+    box-shadow: 0 5px 15px rgba(249, 115, 22, 0.1);
+    transform: translateY(-100%);
+    animation: scanMove 3s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
+}
+
+.image-preview-container.scanning .scan-overlay {
+    display: block;
+}
+
+@keyframes scanMove {
+    0% { transform: translateY(-100%); }
+    50% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+}
+
+/* Result Slide Up - Soft Rise */
+.result-section {
+    display: none;
+    animation: softRise 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes softRise {
+    from { opacity: 0; transform: translateY(30px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Loading Spinner - Sun Rotate */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.tech-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #ffedd5;
+    border-right-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: #9a3412;
+    font-family: sans-serif;
+    font-weight: 600;
+    animation: breathe 3s infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Empty State - Cozy Illustration Vibe */
+.empty-state-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff7ed;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.center-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.ai-icon-circle {
+    width: 90px;
+    height: 90px;
+    background: white;
+    border: 2px solid #fed7aa;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.1);
+}
+
+.ai-icon-circle i {
+    font-size: 36px;
+    color: var(--primary-color);
+}
+
+.floating-box {
+    position: absolute;
+    background: white;
+    border-radius: 20px;
+    padding: 8px 16px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatBob 5s infinite ease-in-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #9a3412;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.box-1 {
+    top: 30%; left: 15%;
+    animation-delay: 0s;
+    background: #ffedd5;
+}
+
+.box-2 {
+    top: 55%; right: 15%;
+    animation-delay: 1.5s;
+    background: #ffedd5;
+}
+
+.box-3 {
+    bottom: 20%; left: 35%;
+    animation-delay: 3s;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+}
+
+@keyframes floatBob {
+    0% { opacity: 0; transform: translateY(15px); }
+    20% { opacity: 1; transform: translateY(0); }
+    80% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-15px); }
+}
+
+/* Card Entrance Animation */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary-color)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+}
+
+/* Auth Page Class Animations */
+.auth-card {
+    animation: cardEntrance 1s ease-out forwards;
+}
+
+.logo-icon {
+    animation: logoPulse 3s infinite;
+}
+
+.logo-circle {
+    animation: spin 10s linear infinite;
+}

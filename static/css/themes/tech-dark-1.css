@@ -1,0 +1,311 @@
+/* static/css/themes/tech-dark-1.css - Modern Lab (Clean Light) */
+
+:root {
+    --primary-color: #0284c7;  /* Sky Blue */
+    --secondary-color: #38bdf8;
+    --bg-color: #f8fafc;       /* Slate 50 (Very light gray) */
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --text-color: #334155;     /* Slate 700 */
+    --border-color: #e2e8f0;   /* Slate 200 */
+    
+    /* Bootstrap Variable Overrides */
+    --bs-primary: var(--primary-color);
+    --bs-secondary: var(--secondary-color);
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+}
+
+/* Custom Theme Utility Classes */
+.text-secondary {
+    color: #0369a1 !important; /* Sky 700 for better contrast on white */
+}
+
+.theme-overlay-bg {
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(4px);
+}
+
+.theme-text-contrast {
+    color: #0f172a !important; /* Dark text for contrast against light bg */
+}
+
+body {
+    background-color: var(--bg-color);
+    /* Subtle mesh gradient for a clean look */
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(2, 132, 199, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.05) 0px, transparent 50%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Background Canvas */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+/* Grid Overlay - Minimal Graph Paper */
+.grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(#e2e8f0 1px, transparent 1px),
+        linear-gradient(90deg, #e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Navbar Visuals - Clean White */
+.navbar-custom {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.navbar-brand {
+    color: #0f172a !important;
+    font-weight: 600;
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+}
+
+.nav-link {
+    color: #64748b !important; /* Slate 500 */
+    font-weight: 500;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color) !important;
+    background-color: #f1f5f9;
+    border-radius: 6px;
+}
+
+.nav-link::after {
+    display: none;
+}
+
+/* Upload Card Visuals - Neumorphic-ish */
+.upload-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+}
+
+.upload-card::before {
+    display: none; /* Remove glowing border */
+}
+
+/* Table Visuals */
+.table-custom {
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-bg: #fff;
+    --bs-table-border-color: var(--border-color);
+    --bs-table-striped-bg: #f8fafc;
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-bg: #f1f5f9;
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-bg: #f1f5f9;
+    --bs-table-hover-color: var(--bs-body-color);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+    background-color: var(--bs-table-bg);
+}
+
+.table-custom th {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+/* Scrollbar Visuals */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary-color);
+}
+
+/* --- Added Component Overrides for Complete Theme Coverage --- */
+
+/* Image Preview Visuals */
+.image-preview-container {
+    background: #f8fafc;
+    border-color: #cbd5e1; /* Slate 300 */
+}
+
+.image-preview-container.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+    background: #fff;
+}
+
+/* Corner Marker Visuals */
+.corner-marker {
+    border-color: var(--primary-color);
+}
+
+/* Result Card Visuals */
+.result-card {
+    background: #f0f9ff; /* Sky 50 */
+    border: 1px solid var(--secondary-color);
+}
+
+.result-card::after {
+    background: #fff;
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* History Container Visuals */
+.history-container {
+    background: #fff;
+    border: 1px solid var(--border-color);
+}
+
+.history-header {
+    border-bottom-color: var(--border-color);
+    background: #f8fafc;
+}
+
+/* Auth Page Specifics */
+.auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.auth-body {
+    background-color: var(--bg-color);
+}
+
+/* Form Controls Visuals */
+.form-range {
+    accent-color: var(--primary-color);
+}
+
+.form-select,
+.form-control {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    color: var(--text-color);
+}
+
+/* Specific override for floating labels in auth forms */
+.form-floating-auth .form-control {
+    background: #fff !important;
+    color: var(--text-color) !important;
+}
+
+.form-floating-auth label {
+    color: #64748b;
+}
+
+.form-floating-auth .form-control:focus {
+    background: #fff !important;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.15);
+}
+
+.form-select:focus,
+.form-control:focus {
+    background: #fff;
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.15);
+}
+
+.form-check-input {
+    background: #fff;
+    border: 1px solid #cbd5e1;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-control::placeholder {
+    color: #94a3b8; /* Slate 400 */
+}
+
+/* Button Visuals */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.coord-panel .form-control {
+    background: #fff;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.coord-panel .form-control:focus {
+    background: #fff;
+    color: var(--text-color);
+}
+
+.coord-panel .input-group-text {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    color: #fff;
+}
+
+.btn-success:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+}

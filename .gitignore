@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# 环境
+.env
+.venv
+venv/
+env/
+
+# Django
+db.sqlite3
+*.log
+debug_log.txt
+
+# 媒体和上传文件（运行时生成）
+media/
+
+# 模型权重文件（体积大，按需下载）
+models/*.pt
+pretrained/*.pt
+
+# 训练数据（体积过大，1GB+）
+train_data/
+
+# 训练输出结果
+runs/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code 配置
+.claude/

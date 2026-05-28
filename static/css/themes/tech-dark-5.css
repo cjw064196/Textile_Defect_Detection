@@ -1,0 +1,309 @@
+/* static/css/themes/tech-dark-5.css - Fresh Garden (Nature Light) */
+
+:root {
+    --primary-color: #059669;  /* Emerald 600 */
+    --secondary-color: #34d399; /* Emerald 400 */
+    --bg-color: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --text-color: #064e3b;     /* Emerald 900 */
+    --border-color: #d1fae5;   /* Emerald 100 */
+    
+    /* Bootstrap Variable Overrides */
+    --bs-primary: var(--primary-color);
+    --bs-secondary: var(--secondary-color);
+    --bs-body-bg: var(--bg-color);
+    --bs-body-color: var(--text-color);
+}
+
+/* Custom Theme Utility Classes */
+.text-secondary {
+    color: #047857 !important; /* Emerald 700 for better contrast */
+}
+
+.theme-overlay-bg {
+    background-color: rgba(236, 253, 245, 0.8); /* Very light green overlay */
+}
+
+.theme-text-contrast {
+    color: #065f46 !important; /* Dark green text */
+}
+
+body {
+    background-color: var(--bg-color);
+    /* Subtle leaf pattern or organic feel */
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(52, 211, 153, 0.05) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(5, 150, 105, 0.05) 0%, transparent 20%);
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-color);
+}
+
+/* Background Canvas */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.6;
+}
+
+/* Grid Overlay - Organic Grid */
+.grid-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: linear-gradient(0deg, transparent 24%, #ecfdf5 25%, #ecfdf5 26%, transparent 27%, transparent 74%, #ecfdf5 75%, #ecfdf5 76%, transparent 77%, transparent);
+    background-size: 50px 50px;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Navbar Visuals - Fresh */
+.navbar-custom {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    color: #047857 !important;
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand i {
+    color: var(--primary-color);
+}
+
+.nav-link {
+    color: #059669 !important;
+    opacity: 0.8;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: #047857 !important;
+    opacity: 1;
+    font-weight: 600;
+}
+
+.nav-link::after {
+    background: var(--primary-color);
+    height: 3px;
+    border-radius: 3px;
+}
+
+/* Upload Card Visuals - Clean Glass */
+.upload-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(5, 150, 105, 0.08);
+    border-radius: 20px;
+}
+
+.upload-card::before {
+    display: none;
+}
+
+/* Table Visuals */
+.table-custom {
+    --bs-table-color: var(--bs-body-color);
+    --bs-table-bg: #fff;
+    --bs-table-border-color: var(--border-color);
+    --bs-table-striped-bg: #ecfdf5;
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-active-bg: #d1fae5;
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-hover-bg: #d1fae5;
+    --bs-table-hover-color: var(--bs-body-color);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
+    background-color: var(--bs-table-bg);
+}
+
+.table-custom th {
+    background-color: #d1fae5;
+    color: #047857;
+    font-weight: 600;
+}
+
+/* Scrollbar Visuals */
+.history-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.history-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--secondary-color);
+}
+
+/* --- Added Component Overrides for Complete Theme Coverage --- */
+
+/* Image Preview Visuals */
+.image-preview-container {
+    background: #ecfdf5;
+    border-color: #a7f3d0; /* Emerald 200 */
+}
+
+.image-preview-container.active {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+    background: #fff;
+}
+
+/* Corner Marker Visuals */
+.corner-marker {
+    border-color: var(--primary-color);
+}
+
+/* Result Card Visuals */
+.result-card {
+    background: #ecfdf5; /* Emerald 50 */
+    border: 1px solid var(--secondary-color);
+}
+
+.result-card::after {
+    background: #fff;
+    color: var(--secondary-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+/* History Container Visuals */
+.history-container {
+    background: #fff;
+    border: 1px solid var(--border-color);
+}
+
+.history-header {
+    border-bottom-color: var(--border-color);
+    background: #ecfdf5;
+}
+
+/* Auth Page Specifics */
+.auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.auth-body {
+    background-color: var(--bg-color);
+}
+
+/* Form Controls Visuals */
+.form-range {
+    accent-color: var(--primary-color);
+}
+
+.form-select,
+.form-control {
+    background: #fff;
+    border: 1px solid #a7f3d0;
+    color: var(--text-color);
+}
+
+/* Specific override for floating labels in auth forms */
+.form-floating-auth .form-control {
+    background: #fff !important;
+    color: var(--text-color) !important;
+}
+
+.form-floating-auth label {
+    color: #065f46; /* Emerald 800 */
+}
+
+.form-floating-auth .form-control:focus {
+    background: #fff !important;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(5, 150, 105, 0.15);
+}
+
+.form-select:focus,
+.form-control:focus {
+    background: #fff;
+    border-color: var(--primary-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(5, 150, 105, 0.15);
+}
+
+.form-check-input {
+    background: #fff;
+    border: 1px solid #a7f3d0;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-control::placeholder {
+    color: #6ee7b7; /* Emerald 300 */
+}
+
+/* Button Visuals */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-color);
+    color: #fff;
+}
+
+.coord-panel .form-control {
+    background: #fff;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.coord-panel .form-control:focus {
+    background: #fff;
+    color: var(--text-color);
+}
+
+.coord-panel .input-group-text {
+    background: transparent;
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+    color: #fff;
+}
+
+.btn-success:disabled {
+    background: #a7f3d0;
+    color: #ecfdf5;
+}

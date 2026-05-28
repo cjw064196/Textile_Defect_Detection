@@ -1,0 +1,190 @@
+/* static/css/animations/tech-anim-5.css - Fresh Garden Animations */
+
+/* Scan Animation - Growth Scan */
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(52, 211, 153, 0.2), transparent);
+    border-bottom: 3px solid rgba(5, 150, 105, 0.3);
+    transform: translateY(-100%);
+    animation: scanMove 2.5s ease-in-out infinite;
+    pointer-events: none;
+    display: none;
+}
+
+.image-preview-container.scanning .scan-overlay {
+    display: block;
+}
+
+@keyframes scanMove {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+/* Result Slide Up - Sprout Up */
+.result-section {
+    display: none;
+    animation: sproutUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes sproutUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.9); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Loading Spinner - Organic Ring */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.tech-spinner {
+    width: 55px;
+    height: 55px;
+    border: 3px solid #d1fae5;
+    border-top-color: var(--primary-color);
+    border-bottom-color: var(--secondary-color);
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading-text {
+    color: #059669;
+    font-weight: 500;
+    animation: pulse 2s infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/* Empty State - Nature Breath */
+.empty-state-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+.center-content {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.ai-icon-circle {
+    width: 80px;
+    height: 80px;
+    background: #ecfdf5;
+    border: 1px solid #34d399;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    animation: breath 4s infinite ease-in-out;
+}
+
+@keyframes breath {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 20px 0 rgba(52, 211, 153, 0.2); }
+}
+
+.ai-icon-circle i {
+    font-size: 32px;
+    color: var(--primary-color);
+}
+
+.floating-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #d1fae5;
+    border-radius: 12px;
+    padding: 6px 10px;
+    pointer-events: none;
+    opacity: 0;
+    animation: floatLeaf 7s infinite ease-in-out;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.05);
+    color: #059669;
+    font-size: 11px;
+}
+
+.box-1 {
+    top: 25%; left: 18%;
+    animation-delay: 0s;
+}
+
+.box-2 {
+    top: 65%; right: 18%;
+    animation-delay: 2s;
+}
+
+.box-3 {
+    bottom: 25%; left: 40%;
+    animation-delay: 4.5s;
+}
+
+@keyframes floatLeaf {
+    0% { opacity: 0; transform: translateY(10px) rotate(-5deg); }
+    20% { opacity: 1; transform: translateY(0) rotate(0deg); }
+    80% { opacity: 1; transform: translateY(0) rotate(5deg); }
+    100% { opacity: 0; transform: translateY(-10px) rotate(10deg); }
+}
+
+/* Card Entrance Animation */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) rotateX(10deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+    }
+}
+
+/* Logo Pulse Animation */
+@keyframes logoPulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 20px var(--primary-color)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary-color)); }
+}
+
+/* Auth Page Class Animations */
+.auth-card {
+    animation: cardEntrance 1s ease-out forwards;
+}
+
+.logo-icon {
+    animation: logoPulse 3s infinite;
+}
+
+.logo-circle {
+    animation: spin 10s linear infinite;
+}
